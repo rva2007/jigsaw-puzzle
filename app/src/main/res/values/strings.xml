@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">jigsaw puzzles</string>
+    <string name="title">jigsaw puzzles</string>
+    <string name="camera_button">camera_button</string>
+    <string name="gallery_button">gallery_button</string>
+    <string name="continue_button">Continue</string>
+    <string name="you_won_title">Good job!!!</string>
+    <string name="you_won_message">The picture is assembled!</string>
+    <string name="you_won_question">Do you want to assemble another one?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="complexity_text">Number of puzzles</string>
+    <string name="imageview_on_settings_screen">ImageView on settings screen</string>
+    <string name="imageview_on_puzzle_screen">ImageView on puzzle screen</string>
+    <string name="alpha_for_imageview_on_puzzle_screen">0.3</string>
+    <string name="get_wrong_puzzles_back">get wrong puzzles back</string>
+    <string name="picture">picture</string>
+    <string name="textview">text in TextView</string>
 </resources>
