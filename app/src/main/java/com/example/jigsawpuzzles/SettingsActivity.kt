@@ -1,6 +1,7 @@
 package com.example.jigsawpuzzles
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
@@ -49,6 +50,16 @@ class SettingsActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val intent = intent
+        val orientation = intent.getStringExtra("orientation")
+        if (orientation.equals("landscape")){
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        } else if (orientation.equals("portrait")){
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+
+
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -70,6 +81,7 @@ class SettingsActivity : AppCompatActivity() {
         Log.i("log", info)
 
 
+
         //here get target dimensions
         if (screenOrientationIsPortrait()) {
             targetWidth = screenWidth - (screenWidth / 100 * 20)
@@ -78,6 +90,7 @@ class SettingsActivity : AppCompatActivity() {
             targetHeight = screenHeight - (screenHeight / 100 * 20)
             targetWidth = targetHeight!! / 3 * 4
         }
+
 
         imageView = binding.settingsImageView
         puzzlePathView = binding.puzzlePathView
@@ -114,7 +127,6 @@ class SettingsActivity : AppCompatActivity() {
 
         Log.i("log", info)
 
-        val intent = intent
         bitmapFromAssets = intent.getParcelableExtra("assets")
         bitmapFromGallery = intent.getParcelableExtra("gallery")
         bitmapFromCamera = intent.getParcelableExtra("camera")
@@ -128,6 +140,7 @@ class SettingsActivity : AppCompatActivity() {
         if (bitmapFromCamera != null) {
             bitmap = bitmapFromCamera
         }
+
 
         imageView?.post {
             if (!screenOrientationIsPortrait()) {
