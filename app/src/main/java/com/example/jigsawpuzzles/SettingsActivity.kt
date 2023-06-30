@@ -26,7 +26,7 @@ class SettingsActivity : AppCompatActivity() {
     lateinit var binding: ActivitySettingsBinding
     private var pieces: ArrayList<PuzzlePiece>? = null
     private var isPiecesShow:Boolean = false
-    private var layout: RelativeLayout? = null
+    private var container_layout: RelativeLayout? = null
     private var imageView: ImageView? = null
     private var puzzlePathView: ImageView? = null
     private var backPuzzle: ImageView? = null
@@ -84,7 +84,7 @@ class SettingsActivity : AppCompatActivity() {
         backPuzzle = binding.backPuzzle
         backPuzzle?.isVisible = false
         puzzlePathView?.bringToFront()
-        layout = binding.containerLayout
+        container_layout = binding.containerLayout
         tv_complexity = binding.tvComplexity
         buttonContinue = binding.btnContinue
         seekBar = binding.seekBar
@@ -427,7 +427,7 @@ class SettingsActivity : AppCompatActivity() {
     fun onButtonClick(view: View) {
         imageView?.bringToFront()
         imageView?.alpha = 0.3f
-        layout?.bringToFront()
+        container_layout?.bringToFront()
         puzzlePathView?.isGone = true
         tv_complexity?.isVisible = false
         seekBar?.isVisible = false
@@ -442,27 +442,27 @@ class SettingsActivity : AppCompatActivity() {
         if (pieces != null) isPiecesShow = true
 
         //shuffle pieces order
-//        pieces?.shuffle()
+        pieces?.shuffle()
         for (piece in pieces!!) {
             piece.setOnTouchListener(touchListener)
-            layout!!.addView(piece)
+            container_layout!!.addView(piece)
 
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
             if (screenOrientationIsPortrait()) {
                 //randomize position on the bottom of screen
                 lParams.leftMargin = Random.nextInt(
-                    layout!!.width - piece.pieceData.pieceWidth
+                    container_layout!!.width - piece.pieceData.pieceWidth
                 )
-                lParams.topMargin = layout!!.height - piece.pieceData.pieceHeight
+                lParams.topMargin = container_layout!!.height - piece.pieceData.pieceHeight
 
                 piece.layoutParams = lParams
 
             } else {
                 //randomize position on the right of screen
                 lParams.topMargin = Random.nextInt(
-                    layout!!.height - piece.pieceData.pieceHeight
+                    container_layout!!.height - piece.pieceData.pieceHeight
                 )
-                lParams.leftMargin = layout!!.width - piece.pieceData.pieceWidth
+                lParams.leftMargin = container_layout!!.width - piece.pieceData.pieceWidth
 
                 piece.layoutParams = lParams
 
@@ -476,19 +476,19 @@ class SettingsActivity : AppCompatActivity() {
 
             if (piece.pieceData.canMove) {
                 if (screenOrientationIsPortrait()
-                    && (lParams.topMargin != layout!!.height - piece.pieceData.pieceHeight)
+                    && (lParams.topMargin != container_layout!!.height - piece.pieceData.pieceHeight)
                 ) {
                     //randomize position on the bottom of screen
-                    lParams.leftMargin = Random.nextInt(layout!!.width - piece.pieceData.pieceWidth)
-                    lParams.topMargin = layout!!.height - piece.pieceData.pieceHeight
+                    lParams.leftMargin = Random.nextInt(container_layout!!.width - piece.pieceData.pieceWidth)
+                    lParams.topMargin = container_layout!!.height - piece.pieceData.pieceHeight
                     piece.layoutParams = lParams
 
                 } else if (!screenOrientationIsPortrait()
-                    && lParams.leftMargin != layout!!.width - piece.pieceData.pieceWidth
+                    && lParams.leftMargin != container_layout!!.width - piece.pieceData.pieceWidth
                 ) {
                     //randomize position on the right of screen
-                    lParams.topMargin = Random.nextInt(layout!!.height - piece.pieceData.pieceHeight)
-                    lParams.leftMargin = layout!!.width - piece.pieceData.pieceWidth
+                    lParams.topMargin = Random.nextInt(container_layout!!.height - piece.pieceData.pieceHeight)
+                    lParams.leftMargin = container_layout!!.width - piece.pieceData.pieceWidth
                     piece.layoutParams = lParams
                 }
             }
