@@ -1,15 +1,26 @@
 package com.example.jigsawpuzzles
 
+import android.Manifest
+import android.app.Activity
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ThumbnailUtils
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.provider.Settings
+import android.view.View
 import android.widget.AdapterView
 import android.widget.GridView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -17,6 +28,7 @@ import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
 
+    private var requestCode: Int? = null
     private var bitmap: Bitmap? = null
     private var matrix = Matrix()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +37,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         getImagesFromAssets()
+
+
     }
 
     private fun getImagesFromAssets() {
@@ -38,9 +52,9 @@ class MainActivity : AppCompatActivity() {
             gridView.onItemClickListener = AdapterView
                 .OnItemClickListener { adapterView, view, i, l ->
                     bitmap = assetsBitmap("img/" + (files!![i % files.size]).toString())
-                    resizeBitmapAndRotateIfBitmmapLandscape(bitmap!!)
+                    resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
                         val intent = Intent(applicationContext, SettingsActivity::class.java)
-                        intent.putExtra("assetName", bitmap)
+                        intent.putExtra("assets", bitmap)
                         startActivity(intent)
                         bitmap?.recycle()
                         finish()
@@ -65,7 +79,7 @@ class MainActivity : AppCompatActivity() {
         return bitmap
     }
 
-    private fun resizeBitmapAndRotateIfBitmmapLandscape(bmp: Bitmap): Bitmap {
+    private fun resizeBitmapAndRotateIfBitmapLandscape(bmp: Bitmap): Bitmap {
         this.bitmap = bmp
         if (bitmap!!.width > bitmap!!.height) {
             matrix.postRotate(90f)
@@ -81,4 +95,177 @@ class MainActivity : AppCompatActivity() {
         }
         return bitmap!!
     }
+    private fun askForPermissions(): Boolean {
+        if (!isPermissionsAllowed()) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    this as Activity,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+            ) {
+                showPermissionDeniedDialog()
+            }
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    this as Activity,
+                    Manifest.permission.CAMERA
+                )
+            ) {
+                showPermissionDeniedDialog()
+            }
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    this as Activity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            ) {
+                showPermissionDeniedDialog()
+            } else {
+                ActivityCompat.requestPermissions(
+                    this as Activity,
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    ),
+                    REQUEST_CODE
+                )
+            }
+
+
+            return false
+        }
+        return true
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_CODE -> {
+                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission is granted, you can perform your operation here
+
+
+                } else {
+                    // permission is denied, you can ask for permission again, if you want
+                    askForPermissions()
+                }
+                return
+            }
+        }
+    }
+
+
+    private fun showPermissionDeniedDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Permission Denied")
+            .setMessage("Permission is denied, Please allow permissions from App Settings.")
+            .setPositiveButton("App Settings",
+                DialogInterface.OnClickListener { dialogInterface, i ->
+                    // send to app settings if permission is denied permanently
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    val uri = Uri.fromParts("package", packageName, null)
+                    intent.data = uri
+                    startActivity(intent)
+                })
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+   private fun isPermissionsAllowed(): Boolean {
+        return !(ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.CAMERA
+                ) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val intent = intent
+        val exit = intent.getIntExtra("exit", 0)
+        if (exit == 1) finish()
+
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        this.requestCode = requestCode
+        val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+        if (requestCode == GALLERY_REQUEST && resultCode == RESULT_OK) {
+            val uri = data!!.data
+            bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+            resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
+            intent.putExtra("gallery", bitmap)
+            startActivity(intent)
+            bitmap?.recycle()
+            finish()
+
+        }
+        if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
+            bitmap = data?.extras?.get("data") as Bitmap
+            resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
+            intent.putExtra("camera", bitmap)
+            startActivity(intent)
+            bitmap?.recycle()
+            finish()
+        }
+
+    }
+
+    fun onImageCameraClicked(view: View) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this as Activity,
+                arrayOf(Manifest.permission.CAMERA),
+                CAMERA_REQUEST
+            )
+        } else {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(intent, CAMERA_REQUEST)
+        }
+    }
+
+    fun onImageGalleryClicked(view: View) {
+        if (ContextCompat.checkSelfPermission(
+                this@MainActivity,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this@MainActivity, arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ), REQUEST_PERMISSION_READ_EXTERNAL_STORAGE
+            )
+        } else {
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "image/*"
+            startActivityForResult(intent, GALLERY_REQUEST)
+        }
+    }
+
+    companion object {
+        const val CAMERA_REQUEST = 1
+        const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 2
+
+        const val REQUEST_PERMISSION_READ_EXTERNAL_STORAGE = 3
+
+        const val GALLERY_REQUEST = 4
+        const val REQUEST_CODE = 5
+    }
+
 }
