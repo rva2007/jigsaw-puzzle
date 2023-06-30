@@ -52,17 +52,28 @@ class MainActivity : AppCompatActivity() {
             gridView.onItemClickListener = AdapterView
                 .OnItemClickListener { adapterView, view, i, l ->
                     bitmap = assetsBitmap("img/" + (files!![i % files.size]).toString())
+                    val intent = Intent(applicationContext, SettingsActivity::class.java)
+                    intent.putExtra("orientation", getOrientationScreen(bitmap!!))
                     resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
-                        val intent = Intent(applicationContext, SettingsActivity::class.java)
-                        intent.putExtra("assets", bitmap)
-                        startActivity(intent)
-                        bitmap?.recycle()
-                        finish()
+                    intent.putExtra("assets", bitmap)
+                    startActivity(intent)
+                    bitmap?.recycle()
+                    finish()
                 }
         } catch (e: IOException) {
             e.printStackTrace()
             Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun getOrientationScreen(bitmap: Bitmap): String {
+        val orientation: String
+        if (bitmap.width > bitmap.height) {
+            orientation = "landscape"
+        } else {
+            orientation = "portrait"
+        }
+        return orientation
     }
 
     private fun assetsBitmap(str: String): Bitmap? {
@@ -95,6 +106,7 @@ class MainActivity : AppCompatActivity() {
         }
         return bitmap!!
     }
+
     private fun askForPermissions(): Boolean {
         if (!isPermissionsAllowed()) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
@@ -174,7 +186,7 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-   private fun isPermissionsAllowed(): Boolean {
+    private fun isPermissionsAllowed(): Boolean {
         return !(ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.READ_EXTERNAL_STORAGE
@@ -205,6 +217,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == GALLERY_REQUEST && resultCode == RESULT_OK) {
             val uri = data!!.data
             bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+            intent.putExtra("orientation", getOrientationScreen(bitmap!!))
             resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
             intent.putExtra("gallery", bitmap)
             startActivity(intent)
@@ -214,6 +227,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
             bitmap = data?.extras?.get("data") as Bitmap
+            intent.putExtra("orientation", getOrientationScreen(bitmap!!))
             resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
             intent.putExtra("camera", bitmap)
             startActivity(intent)
@@ -260,10 +274,8 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val CAMERA_REQUEST = 1
-        const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 2
-
+//        const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 2
         const val REQUEST_PERMISSION_READ_EXTERNAL_STORAGE = 3
-
         const val GALLERY_REQUEST = 4
         const val REQUEST_CODE = 5
     }
