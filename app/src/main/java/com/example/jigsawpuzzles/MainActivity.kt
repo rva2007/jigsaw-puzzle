@@ -1,5 +1,6 @@
 package com.example.jigsawpuzzles
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -38,11 +39,11 @@ class MainActivity : AppCompatActivity() {
                 .OnItemClickListener { adapterView, view, i, l ->
                     bitmap = assetsBitmap("img/" + (files!![i % files.size]).toString())
                     resizeBitmapAndRotateIfBitmmapLandscape(bitmap!!)
-    //                    val intent = Intent(applicationContext, SettingsActivity::class.java)
-    //                    intent.putExtra("assetName", bitmap)
-    //                    startActivity(intent)
-    //                    bitmap?.recycle()
-    //                    finish()
+                        val intent = Intent(applicationContext, SettingsActivity::class.java)
+                        intent.putExtra("assetName", bitmap)
+                        startActivity(intent)
+                        bitmap?.recycle()
+                        finish()
                 }
         } catch (e: IOException) {
             e.printStackTrace()
