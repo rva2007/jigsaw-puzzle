@@ -1,6 +1,7 @@
 package com.example.jigsawpuzzles
 
 import android.annotation.SuppressLint
+import android.media.MediaPlayer
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -53,6 +54,10 @@ class TouchListener(private val activity: SettingsActivity) : View.OnTouchListen
                 piece.pieceData.y = piece.y.toInt()
 
                 if (xDiff <= tolerance && yDiff <= tolerance) {
+
+                    val fitSound = MediaPlayer.create(this.activity,R.raw.fit_sound)
+                    fitSound.start()
+
                     lParams.leftMargin = piece.pieceData.xCoord
                     lParams.topMargin = piece.pieceData.yCoord
                     piece.layoutParams = lParams

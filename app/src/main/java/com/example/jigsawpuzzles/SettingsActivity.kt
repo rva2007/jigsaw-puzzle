@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.media.MediaPlayer
 import android.media.ThumbnailUtils
 import android.os.Build
 import android.os.Bundle
@@ -213,6 +214,8 @@ class SettingsActivity : AppCompatActivity() {
     fun checkGameOver() {
         if (isGameOver) {
             val intent = Intent(this@SettingsActivity, MainActivity::class.java)
+            val successSound = MediaPlayer.create(this@SettingsActivity,R.raw.success_sound)
+            successSound.start()
 
             AlertDialog.Builder(this@SettingsActivity)
                 .setTitle(getString(R.string.you_won_title))
