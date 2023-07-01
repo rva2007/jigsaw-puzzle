@@ -2,7 +2,6 @@ package com.example.jigsawpuzzles
 
 import android.Manifest
 import android.app.Activity
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -50,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
             gridView.adapter = GridViewAdapter(this@MainActivity)
             gridView.onItemClickListener = AdapterView
-                .OnItemClickListener { adapterView, view, i, l ->
+                .OnItemClickListener { _, _, i, _ ->
                     bitmap = assetsBitmap("img/" + (files!![i % files.size]).toString())
                     val intent = Intent(applicationContext, SettingsActivity::class.java)
                     intent.putExtra("orientation", getOrientationScreen(bitmap!!))
@@ -173,15 +172,15 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Permission Denied")
             .setMessage("Permission is denied, Please allow permissions from App Settings.")
-            .setPositiveButton("App Settings",
-                DialogInterface.OnClickListener { dialogInterface, i ->
-                    // send to app settings if permission is denied permanently
-                    val intent = Intent()
-                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                    val uri = Uri.fromParts("package", packageName, null)
-                    intent.data = uri
-                    startActivity(intent)
-                })
+            .setPositiveButton("App Settings")
+            { dialogInterface, i ->
+                // send to app settings if permission is denied permanently
+                val intent = Intent()
+                intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                val uri = Uri.fromParts("package", packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            }
             .setNegativeButton("Cancel", null)
             .show()
     }
@@ -199,14 +198,6 @@ class MainActivity : AppCompatActivity() {
                     this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ) != PackageManager.PERMISSION_GRANTED)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        val intent = intent
-        val exit = intent.getIntExtra("exit", 0)
-        if (exit == 1) finish()
-
     }
 
     @Deprecated("Deprecated in Java")
@@ -272,9 +263,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        AlertDialog.Builder(this).apply {
+            setTitle(getString(R.string.confirmation))
+            setMessage(getString(R.string.are_you_sure))
+
+            setPositiveButton(getString(R.string.yes)) { _, _ ->
+                super.onBackPressed()
+            }
+
+            setNegativeButton(getString(R.string.no)) { _, _ ->
+            }
+            setCancelable(true)
+        }.create().show()
+    }
+
     companion object {
         const val CAMERA_REQUEST = 1
-//        const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 2
+
+        //        const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 2
         const val REQUEST_PERMISSION_READ_EXTERNAL_STORAGE = 3
         const val GALLERY_REQUEST = 4
         const val REQUEST_CODE = 5
