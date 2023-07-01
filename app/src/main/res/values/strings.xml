@@ -1,6 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">jigsaw puzzles</string>
-    <string name="title">jigsaw puzzles</string>
+    <string name="app_name">Jigsaw puzzles</string>
+    <string name="title">Jigsaw puzzles</string>
     <string name="camera_button">camera_button</string>
     <string name="gallery_button">gallery_button</string>
     <string name="continue_button">Continue</string>
