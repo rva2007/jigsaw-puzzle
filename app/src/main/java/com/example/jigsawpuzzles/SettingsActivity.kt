@@ -8,7 +8,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.media.ThumbnailUtils
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.Display
 import android.view.View
 import android.view.WindowInsets
@@ -26,12 +25,12 @@ import kotlin.random.Random
 class SettingsActivity : AppCompatActivity() {
     lateinit var binding: ActivitySettingsBinding
     private var pieces: ArrayList<PuzzlePiece>? = null
-    private var isPiecesShow:Boolean = false
-    private var container_layout: RelativeLayout? = null
+    private var isPiecesShow: Boolean = false
+    private var containerLayout: RelativeLayout? = null
     private var imageView: ImageView? = null
     private var puzzlePathView: ImageView? = null
     private var backPuzzle: ImageView? = null
-    private var tv_complexity: TextView? = null
+    private var tvComplexity: TextView? = null
     private var seekBar: SeekBar? = null
     private var buttonContinue: Button? = null
     private var bitmapFromAssets: Bitmap? = null
@@ -53,9 +52,9 @@ class SettingsActivity : AppCompatActivity() {
 
         val intent = intent
         val orientation = intent.getStringExtra("orientation")
-        if (orientation.equals("landscape")){
+        if (orientation.equals("landscape")) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        } else if (orientation.equals("portrait")){
+        } else if (orientation.equals("portrait")) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
@@ -77,11 +76,6 @@ class SettingsActivity : AppCompatActivity() {
         val screenWidth: Int = point.x
         val screenHeight: Int = point.y
 
-        var info = "Ширина экрана: $screenWidth; Высота экрана: $screenHeight"
-        Log.i("log", info)
-
-
-
         //here get target dimensions
         if (screenOrientationIsPortrait()) {
             targetWidth = screenWidth - (screenWidth / 100 * 20)
@@ -97,8 +91,8 @@ class SettingsActivity : AppCompatActivity() {
         backPuzzle = binding.backPuzzle
         backPuzzle?.isVisible = false
         puzzlePathView?.bringToFront()
-        container_layout = binding.containerLayout
-        tv_complexity = binding.tvComplexity
+        containerLayout = binding.containerLayout
+        tvComplexity = binding.tvComplexity
         buttonContinue = binding.btnContinue
         seekBar = binding.seekBar
 
@@ -109,7 +103,7 @@ class SettingsActivity : AppCompatActivity() {
         (puzzlePathView as PuzzlePathView).num = columns!!
         complexity = columns!! * rows!!
         str = getString(R.string.complexity_text) + " $complexity"
-        tv_complexity!!.text = str
+        tvComplexity!!.text = str
 
 
         val params = imageView?.layoutParams
@@ -121,11 +115,6 @@ class SettingsActivity : AppCompatActivity() {
         imageViewHeight = imageView?.layoutParams?.height
 
         puzzlePathView?.layoutParams = params
-
-        info =
-            "Ширина imageView: $imageViewWidth; Высота imageView: $imageViewHeight"
-
-        Log.i("log", info)
 
         bitmapFromAssets = intent.getParcelableExtra("assets")
         bitmapFromGallery = intent.getParcelableExtra("gallery")
@@ -166,7 +155,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    fun WindowManager.currentWindowMetricsPointCompat(): Point {
+    private fun WindowManager.currentWindowMetricsPointCompat(): Point {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val windowInsets = currentWindowMetrics.windowInsets
             var insets: Insets = windowInsets.getInsets(WindowInsets.Type.navigationBars())
@@ -223,22 +212,35 @@ class SettingsActivity : AppCompatActivity() {
 
     fun checkGameOver() {
         if (isGameOver) {
+            val intent = Intent(this@SettingsActivity, MainActivity::class.java)
+
             AlertDialog.Builder(this@SettingsActivity)
                 .setTitle(getString(R.string.you_won_title))
                 .setIcon(R.drawable.ic_celebration)
                 .setMessage(getString(R.string.you_won_message) + "\n" + getString(R.string.you_won_question))
                 .setPositiveButton(getString(R.string.yes)) { dialog, _ ->
-                    val intent = Intent(this@SettingsActivity, MainActivity::class.java)
                     startActivity(intent)
                     dialog.dismiss()
                     finish()
                 }
                 .setNegativeButton(getString(R.string.no)) { dialog, _ ->
-                    val intent = Intent(this@SettingsActivity, MainActivity::class.java)
-                    intent.putExtra("exit", "exit")
-                    startActivity(intent)
+
+                    AlertDialog.Builder(this).apply {
+                        setTitle(getString(R.string.confirmation))
+                        setMessage(getString(R.string.are_you_sure))
+
+                        setPositiveButton(getString(R.string.yes)) { _, _ ->
+                            super.onBackPressed()
+                        }
+                        setNegativeButton(getString(R.string.no)) { _, _ ->
+                            startActivity(intent)
+                            dialog.dismiss()
+                            finish()
+                        }
+                        setCancelable(true)
+                    }.create().show()
+
                     dialog.dismiss()
-                    finish()
                 }
                 .create()
                 .show()
@@ -440,9 +442,9 @@ class SettingsActivity : AppCompatActivity() {
     fun onButtonClick(view: View) {
         imageView?.bringToFront()
         imageView?.alpha = 0.3f
-        container_layout?.bringToFront()
+        containerLayout?.bringToFront()
         puzzlePathView?.isGone = true
-        tv_complexity?.isVisible = false
+        tvComplexity?.isVisible = false
         seekBar?.isVisible = false
         buttonContinue?.isVisible = false
         backPuzzle?.isVisible = true
@@ -458,24 +460,24 @@ class SettingsActivity : AppCompatActivity() {
         pieces?.shuffle()
         for (piece in pieces!!) {
             piece.setOnTouchListener(touchListener)
-            container_layout!!.addView(piece)
+            containerLayout!!.addView(piece)
 
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
             if (screenOrientationIsPortrait()) {
                 //randomize position on the bottom of screen
                 lParams.leftMargin = Random.nextInt(
-                    container_layout!!.width - piece.pieceData.pieceWidth
+                    containerLayout!!.width - piece.pieceData.pieceWidth
                 )
-                lParams.topMargin = container_layout!!.height - piece.pieceData.pieceHeight
+                lParams.topMargin = containerLayout!!.height - piece.pieceData.pieceHeight
 
                 piece.layoutParams = lParams
 
             } else {
                 //randomize position on the right of screen
                 lParams.topMargin = Random.nextInt(
-                    container_layout!!.height - piece.pieceData.pieceHeight
+                    containerLayout!!.height - piece.pieceData.pieceHeight
                 )
-                lParams.leftMargin = container_layout!!.width - piece.pieceData.pieceWidth
+                lParams.leftMargin = containerLayout!!.width - piece.pieceData.pieceWidth
 
                 piece.layoutParams = lParams
 
@@ -489,23 +491,41 @@ class SettingsActivity : AppCompatActivity() {
 
             if (piece.pieceData.canMove) {
                 if (screenOrientationIsPortrait()
-                    && (lParams.topMargin != container_layout!!.height - piece.pieceData.pieceHeight)
+                    && (lParams.topMargin != containerLayout!!.height - piece.pieceData.pieceHeight)
                 ) {
                     //randomize position on the bottom of screen
-                    lParams.leftMargin = Random.nextInt(container_layout!!.width - piece.pieceData.pieceWidth)
-                    lParams.topMargin = container_layout!!.height - piece.pieceData.pieceHeight
+                    lParams.leftMargin =
+                        Random.nextInt(containerLayout!!.width - piece.pieceData.pieceWidth)
+                    lParams.topMargin = containerLayout!!.height - piece.pieceData.pieceHeight
                     piece.layoutParams = lParams
 
                 } else if (!screenOrientationIsPortrait()
-                    && lParams.leftMargin != container_layout!!.width - piece.pieceData.pieceWidth
+                    && lParams.leftMargin != containerLayout!!.width - piece.pieceData.pieceWidth
                 ) {
                     //randomize position on the right of screen
-                    lParams.topMargin = Random.nextInt(container_layout!!.height - piece.pieceData.pieceHeight)
-                    lParams.leftMargin = container_layout!!.width - piece.pieceData.pieceWidth
+                    lParams.topMargin =
+                        Random.nextInt(containerLayout!!.height - piece.pieceData.pieceHeight)
+                    lParams.leftMargin = containerLayout!!.width - piece.pieceData.pieceWidth
                     piece.layoutParams = lParams
                 }
             }
         }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        AlertDialog.Builder(this).apply {
+            setTitle(getString(R.string.confirmation))
+            setMessage(getString(R.string.are_you_sure))
+
+            setPositiveButton(getString(R.string.yes)) { _, _ ->
+                super.onBackPressed()
+            }
+
+            setNegativeButton(getString(R.string.no)) { _, _ ->
+            }
+            setCancelable(true)
+        }.create().show()
     }
 
 }
