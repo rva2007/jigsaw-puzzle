@@ -91,10 +91,11 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.88" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/backPuzzle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
         android:clickable="true"
         android:contentDescription="@string/get_wrong_puzzles_back"
         android:onClick="onBackPuzzleClick"

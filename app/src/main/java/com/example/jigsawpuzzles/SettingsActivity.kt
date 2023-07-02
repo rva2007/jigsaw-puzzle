@@ -192,6 +192,8 @@ class SettingsActivity : AppCompatActivity() {
             seekBar: SeekBar, progress: Int,
             fromUser: Boolean
         ) {
+            clickSound()
+
             columns = seekBar.progress
             rows = columns!! * 4 / 3
             complexity = columns!! * rows!!
@@ -450,9 +452,7 @@ class SettingsActivity : AppCompatActivity() {
 
 
     fun onButtonClick(view: View) {
-        val clickSound = MediaPlayer.create(this@SettingsActivity, R.raw.click_sound)
-        clickSound.start()
-
+        clickSound()
         imageView?.bringToFront()
         imageView?.alpha = 0.3f
         containerLayout?.bringToFront()
@@ -499,8 +499,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     fun onBackPuzzleClick(view: View) {
-        val clickSound = MediaPlayer.create(this@SettingsActivity, R.raw.click_sound)
-        clickSound.start()
+        clickSound()
 
         for (piece in pieces!!) {
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
@@ -509,6 +508,13 @@ class SettingsActivity : AppCompatActivity() {
                 if (screenOrientationIsPortrait()
                     && (lParams.topMargin != containerLayout!!.height - piece.pieceData.pieceHeight)
                 ) {
+                    //this is the place for the animation code
+
+
+
+
+
+
                     //randomize position on the bottom of screen
                     lParams.leftMargin =
                         Random.nextInt(containerLayout!!.width - piece.pieceData.pieceWidth)
@@ -518,6 +524,13 @@ class SettingsActivity : AppCompatActivity() {
                 } else if (!screenOrientationIsPortrait()
                     && lParams.leftMargin != containerLayout!!.width - piece.pieceData.pieceWidth
                 ) {
+                    //this is the place for the animation code
+
+
+
+
+
+
                     //randomize position on the right of screen
                     lParams.topMargin =
                         Random.nextInt(containerLayout!!.height - piece.pieceData.pieceHeight)
@@ -526,6 +539,11 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun clickSound() {
+        val clickSound = MediaPlayer.create(this@SettingsActivity, R.raw.click_sound)
+        clickSound.start()
     }
 
     @Deprecated("Deprecated in Java")

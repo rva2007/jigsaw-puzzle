@@ -22,6 +22,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:background="@drawable/border_image"
         android:contentDescription="@string/imageview_on_settings_screen"
         app:layout_constraintDimensionRatio="w,3:4"
         app:layout_constraintEnd_toEndOf="parent"
@@ -92,10 +93,12 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.88" />
 
-    <ImageView
+
+    <ImageButton
         android:id="@+id/backPuzzle"
-        android:layout_width="204dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
         android:clickable="true"
         android:contentDescription="@string/get_wrong_puzzles_back"
         android:onClick="onBackPuzzleClick"
@@ -104,7 +107,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline2"
+        app:layout_constraintTop_toBottomOf="@+id/container_layout"
         app:layout_constraintVertical_bias="0.51"
         app:srcCompat="@drawable/ic_back_puzzle" />
 

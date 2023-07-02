@@ -56,10 +56,7 @@ class MainActivity : AppCompatActivity() {
             gridView.adapter = GridViewAdapter(this@MainActivity)
             gridView.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->
-
-                    val clickSound = MediaPlayer.create(this@MainActivity, R.raw.click_sound)
-                    clickSound.start()
-
+                    clickSound()
                     bitmap = assetsBitmap("img/" + (files!![i % files.size]).toString())
                     val intent = Intent(applicationContext, SettingsActivity::class.java)
                     intent.putExtra("orientation", getOrientationScreen(bitmap!!))
@@ -73,6 +70,11 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
             Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun clickSound() {
+        val clickSound = MediaPlayer.create(this@MainActivity, R.raw.click_sound)
+        clickSound.start()
     }
 
     private fun getOrientationScreen(bitmap: Bitmap): String {
@@ -250,6 +252,7 @@ class MainActivity : AppCompatActivity() {
                 CAMERA_REQUEST
             )
         } else {
+            clickSound()
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             startActivityForResult(intent, CAMERA_REQUEST)
         }
@@ -267,6 +270,7 @@ class MainActivity : AppCompatActivity() {
                 ), REQUEST_PERMISSION_READ_EXTERNAL_STORAGE
             )
         } else {
+            clickSound()
             val intent = Intent(Intent.ACTION_GET_CONTENT)
             intent.type = "image/*"
             startActivityForResult(intent, GALLERY_REQUEST)
