@@ -37,8 +37,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         getImagesFromAssets()
+    }
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        if (MediaPlayer().isPlaying){
+            MediaPlayer().stop()
+        }
     }
 
     private fun getImagesFromAssets() {
@@ -52,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             gridView.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->
 
-                    val clickSound = MediaPlayer.create(this@MainActivity,R.raw.click_sound)
+                    val clickSound = MediaPlayer.create(this@MainActivity, R.raw.click_sound)
                     clickSound.start()
 
                     bitmap = assetsBitmap("img/" + (files!![i % files.size]).toString())
