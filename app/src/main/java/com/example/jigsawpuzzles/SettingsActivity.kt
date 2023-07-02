@@ -214,7 +214,7 @@ class SettingsActivity : AppCompatActivity() {
     fun checkGameOver() {
         if (isGameOver) {
             val intent = Intent(this@SettingsActivity, MainActivity::class.java)
-            val successSound = MediaPlayer.create(this@SettingsActivity,R.raw.success_sound)
+            val successSound = MediaPlayer.create(this@SettingsActivity, R.raw.success_sound)
             successSound.start()
 
             AlertDialog.Builder(this@SettingsActivity)
@@ -443,6 +443,9 @@ class SettingsActivity : AppCompatActivity() {
 
 
     fun onButtonClick(view: View) {
+        val clickSound = MediaPlayer.create(this@SettingsActivity, R.raw.click_sound)
+        clickSound.start()
+
         imageView?.bringToFront()
         imageView?.alpha = 0.3f
         containerLayout?.bringToFront()
@@ -489,6 +492,9 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     fun onBackPuzzleClick(view: View) {
+        val clickSound = MediaPlayer.create(this@SettingsActivity, R.raw.click_sound)
+        clickSound.start()
+
         for (piece in pieces!!) {
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
 

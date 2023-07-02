@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.media.MediaPlayer
 import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Bundle
@@ -50,6 +51,10 @@ class MainActivity : AppCompatActivity() {
             gridView.adapter = GridViewAdapter(this@MainActivity)
             gridView.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->
+
+                    val clickSound = MediaPlayer.create(this@MainActivity,R.raw.click_sound)
+                    clickSound.start()
+
                     bitmap = assetsBitmap("img/" + (files!![i % files.size]).toString())
                     val intent = Intent(applicationContext, SettingsActivity::class.java)
                     intent.putExtra("orientation", getOrientationScreen(bitmap!!))
