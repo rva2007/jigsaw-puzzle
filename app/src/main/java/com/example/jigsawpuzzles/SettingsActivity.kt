@@ -148,6 +148,13 @@ class SettingsActivity : AppCompatActivity() {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        if (MediaPlayer().isPlaying){
+            MediaPlayer().stop()
+        }
+    }
+
 
     private fun screenOrientationIsPortrait(): Boolean {
         return when (resources.configuration.orientation) {
