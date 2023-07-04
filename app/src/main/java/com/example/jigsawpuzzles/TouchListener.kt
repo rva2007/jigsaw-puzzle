@@ -36,13 +36,11 @@ class TouchListener(private val activity: SettingsActivity) : View.OnTouchListen
                 yDelta = y - lParams.topMargin
                 piece.bringToFront()
             }
-
             MotionEvent.ACTION_MOVE -> {
                 lParams.leftMargin = (x - xDelta).toInt()
                 lParams.topMargin = (y - yDelta).toInt()
                 view.layoutParams = lParams
             }
-
             MotionEvent.ACTION_UP -> {
                 val xDiff = StrictMath.abs(
                     piece.pieceData.xCoord - lParams.leftMargin
@@ -54,10 +52,8 @@ class TouchListener(private val activity: SettingsActivity) : View.OnTouchListen
                 piece.pieceData.y = piece.y.toInt()
 
                 if (xDiff <= tolerance && yDiff <= tolerance) {
-
                     val fitSound = MediaPlayer.create(this.activity,R.raw.fit_sound)
                     fitSound.start()
-
                     lParams.leftMargin = piece.pieceData.xCoord
                     lParams.topMargin = piece.pieceData.yCoord
                     piece.layoutParams = lParams
