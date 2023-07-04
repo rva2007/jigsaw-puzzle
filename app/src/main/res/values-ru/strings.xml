@@ -7,12 +7,11 @@
     <string name="continue_button">Продолжить</string>
     <string name="you_won_title">Хорошая работа!!!</string>
     <string name="you_won_message">Картинка собрана!</string>
-    <string name="you_won_question">Хочешь собрать еще одну?</string>
+    <string name="you_won_question">Хотите собрать еще одну?</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
     <string name="complexity_text">Количество пазлов </string>
     <string name="imageview_on_settings_screen">ImageView на экране настроек</string>
-    <string name="imageview_on_puzzle_screen">ImageView на экране puzzle</string>
     <string name="alpha_for_imageview_on_puzzle_screen">0.3</string>
     <string name="get_wrong_puzzles_back">вернуть неверно установленные пазлы</string>
     <string name="picture">картинка</string>

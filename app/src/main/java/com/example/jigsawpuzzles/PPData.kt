@@ -15,5 +15,4 @@ data class PPData(
     var pieceHeight: Int = 0,
     var canMove: Boolean = true,
     var bitmap: Bitmap? = null
-
 ) : Parcelable
