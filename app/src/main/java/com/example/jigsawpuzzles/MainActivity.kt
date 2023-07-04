@@ -27,7 +27,6 @@ import java.io.IOException
 import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
-
     private var requestCode: Int? = null
     private var bitmap: Bitmap? = null
     private var matrix = Matrix()
@@ -41,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (MediaPlayer().isPlaying){
+        if (MediaPlayer().isPlaying) {
             MediaPlayer().stop()
         }
     }
@@ -52,7 +51,6 @@ class MainActivity : AppCompatActivity() {
         try {
             val files = assetManager.list("img")
             val gridView = findViewById<GridView>(R.id.idGRV)
-
             gridView.adapter = GridViewAdapter(this@MainActivity)
             gridView.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->
@@ -93,7 +91,6 @@ class MainActivity : AppCompatActivity() {
         try {
             inputStream = applicationContext.assets.open(str)
             bitmap = BitmapFactory.decodeStream(inputStream)
-
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
             Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_SHORT).show()
@@ -146,13 +143,11 @@ class MainActivity : AppCompatActivity() {
                     arrayOf(
                         Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
                     ),
                     REQUEST_CODE
                 )
             }
-
-
             return false
         }
         return true
@@ -166,11 +161,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             REQUEST_CODE -> {
-                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission is granted, you can perform your operation here
-
-
-                } else {
+                if (!(grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     // permission is denied, you can ask for permission again, if you want
                     askForPermissions()
                 }
@@ -226,7 +217,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             bitmap?.recycle()
             finish()
-
         }
         if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
             bitmap = data?.extras?.get("data") as Bitmap
@@ -237,7 +227,6 @@ class MainActivity : AppCompatActivity() {
             bitmap?.recycle()
             finish()
         }
-
     }
 
     fun onImageCameraClicked(view: View) {
@@ -282,11 +271,9 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this).apply {
             setTitle(getString(R.string.confirmation))
             setMessage(getString(R.string.are_you_sure))
-
             setPositiveButton(getString(R.string.yes)) { _, _ ->
                 super.onBackPressed()
             }
-
             setNegativeButton(getString(R.string.no)) { _, _ ->
             }
             setCancelable(true)
@@ -295,11 +282,9 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val CAMERA_REQUEST = 1
-
-        //        const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 2
-        const val REQUEST_PERMISSION_READ_EXTERNAL_STORAGE = 3
-        const val GALLERY_REQUEST = 4
-        const val REQUEST_CODE = 5
+        const val REQUEST_PERMISSION_READ_EXTERNAL_STORAGE = 2
+        const val GALLERY_REQUEST = 3
+        const val REQUEST_CODE = 4
     }
 
 }
