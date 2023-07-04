@@ -18,7 +18,6 @@ import kotlin.math.min
 
 
 class GridViewAdapter(private val context: Context) : BaseAdapter() {
-
     private val assetManager: AssetManager = context.assets
     private var files: Array<String>? = null
 
@@ -32,22 +31,21 @@ class GridViewAdapter(private val context: Context) : BaseAdapter() {
 
     @SuppressLint("ViewHolder")
     override fun getView(position: Int, view: View?, viewGroup: ViewGroup?): View {
-        val v = View.inflate(context, R.layout.gridview_item, null)
-
-        val imageView = v.findViewById<ImageView>(R.id.idIVCourse)
+        val mView = View.inflate(context, R.layout.gridview_item, null)
+        val imageView = mView.findViewById<ImageView>(R.id.idIVCourse)
         imageView.post {
             val executor = Executors.newSingleThreadExecutor()
             val handler = Handler(Looper.getMainLooper())
             executor.execute {
-                //Background work here
-             val bitmap = getPicFromAsset(imageView, files!![position])
+                //background work here
+                val bitmap = getPicFromAsset(imageView, files!![position])
                 handler.post {
-                    //UI Thread work here
+                    //UI thread work here
                     imageView.setImageBitmap(bitmap)
                 }
             }
         }
-        return v
+        return mView
     }
 
     private fun getPicFromAsset(imageView: ImageView?, assetName: String): Bitmap? {
@@ -62,11 +60,7 @@ class GridViewAdapter(private val context: Context) : BaseAdapter() {
             val bmOptions = BitmapFactory.Options()
             bmOptions.inJustDecodeBounds = true
 
-            BitmapFactory.decodeStream(
-                `is`,
-                Rect(-1, -1, -1, -1),
-                bmOptions
-            )
+            BitmapFactory.decodeStream(`is`, Rect(-1, -1, -1, -1), bmOptions)
 
             val photoW = bmOptions.outWidth
             val photoH = bmOptions.outHeight
@@ -79,16 +73,11 @@ class GridViewAdapter(private val context: Context) : BaseAdapter() {
             bmOptions.inSampleSize = scaleFactor
             bmOptions.inBitmap
             `is` = assetManager.open("img/$assetName")
-            BitmapFactory.decodeStream(
-                `is`,
-                Rect(-1, -1, -1, -1),
-                bmOptions
-            )
+            BitmapFactory.decodeStream(`is`, Rect(-1, -1, -1, -1), bmOptions)
         } catch (e: IOException) {
             e.printStackTrace()
             null
         }
-
     }
 
     init {
