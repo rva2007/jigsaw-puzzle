@@ -46,11 +46,12 @@ class SettingsActivity : AppCompatActivity() {
     private var columns: Int? = null
     private var rows: Int? = null
     private var complexity: Int? = null
+    val bigSideOfImageView = 4
+    val smallSideOfImageView = 3
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val intent = intent
         val orientation = intent.getStringExtra("orientation")
         if (orientation.equals("landscape")) {
@@ -58,7 +59,6 @@ class SettingsActivity : AppCompatActivity() {
         } else if (orientation.equals("portrait")) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
-
 
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -76,16 +76,16 @@ class SettingsActivity : AppCompatActivity() {
         //here get dimensions device screen
         val screenWidth: Int = point.x
         val screenHeight: Int = point.y
-
         //here get target dimensions
         if (screenOrientationIsPortrait()) {
-            targetWidth = screenWidth - (screenWidth / 100 * 20)
-            targetHeight = targetWidth!! / 3 * 4
+            //targetWidth is 80% from screenWidth
+            targetWidth = screenWidth - ((screenWidth / 100) * 20)
+            targetHeight = (targetWidth!! / smallSideOfImageView) * bigSideOfImageView
         } else {
-            targetHeight = screenHeight - (screenHeight / 100 * 20)
-            targetWidth = targetHeight!! / 3 * 4
+            //targetHeight is 80% from screenHeight
+            targetHeight = screenHeight - ((screenHeight / 100) * 20)
+            targetWidth = (targetHeight!! / smallSideOfImageView) * bigSideOfImageView
         }
-
 
         imageView = binding.settingsImageView
         puzzlePathView = binding.puzzlePathView
@@ -100,12 +100,11 @@ class SettingsActivity : AppCompatActivity() {
         seekBar?.setOnSeekBarChangeListener(onSeekBarChangeListener)
         columns = seekBar!!.progress
 
-        rows = columns!! * 4 / 3
+        rows = columns!! * bigSideOfImageView / smallSideOfImageView
         (puzzlePathView as PuzzlePathView).num = columns!!
         complexity = columns!! * rows!!
         str = getString(R.string.complexity_text) + " $complexity"
         tvComplexity!!.text = str
-
 
         val params = imageView?.layoutParams
         params?.width = targetWidth
@@ -131,7 +130,6 @@ class SettingsActivity : AppCompatActivity() {
             bitmap = bitmapFromCamera
         }
 
-
         imageView?.post {
             if (!screenOrientationIsPortrait()) {
                 val matrix = Matrix()
@@ -140,21 +138,17 @@ class SettingsActivity : AppCompatActivity() {
                     bitmap!!, 0, 0, bitmap!!.width, bitmap!!.height, matrix, true
                 )
             }
-            bitmap =
-                ThumbnailUtils.extractThumbnail(bitmap, imageViewWidth!!, imageViewHeight!!)
+            bitmap = ThumbnailUtils.extractThumbnail(bitmap, imageViewWidth!!, imageViewHeight!!)
             imageView?.setImageBitmap(bitmap)
         }
-
-
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (MediaPlayer().isPlaying){
+        if (MediaPlayer().isPlaying) {
             MediaPlayer().stop()
         }
     }
-
 
     private fun screenOrientationIsPortrait(): Boolean {
         return when (resources.configuration.orientation) {
@@ -193,12 +187,10 @@ class SettingsActivity : AppCompatActivity() {
             fromUser: Boolean
         ) {
             clickSound()
-
             columns = seekBar.progress
-            rows = columns!! * 4 / 3
+            rows = (columns!! * bigSideOfImageView) / smallSideOfImageView
             complexity = columns!! * rows!!
-            str =
-                getString(R.string.complexity_text) + " $complexity"
+            str = getString(R.string.complexity_text) + " $complexity"
             binding.tvComplexity.text = str
             binding.puzzlePathView.num = columns!!
             binding.puzzlePathView.invalidate()
@@ -223,8 +215,7 @@ class SettingsActivity : AppCompatActivity() {
     fun checkGameOver() {
         if (isGameOver) {
             val intent = Intent(this@SettingsActivity, MainActivity::class.java)
-            val successSound = MediaPlayer.create(this@SettingsActivity, R.raw.success_sound)
-            successSound.start()
+            successSound()
 
             AlertDialog.Builder(this@SettingsActivity)
                 .setTitle(getString(R.string.you_won_title))
@@ -236,11 +227,9 @@ class SettingsActivity : AppCompatActivity() {
                     finish()
                 }
                 .setNegativeButton(getString(R.string.no)) { dialog, _ ->
-
                     AlertDialog.Builder(this).apply {
                         setTitle(getString(R.string.confirmation))
                         setMessage(getString(R.string.are_you_sure))
-
                         setPositiveButton(getString(R.string.yes)) { _, _ ->
                             super.onBackPressed()
                         }
@@ -251,13 +240,16 @@ class SettingsActivity : AppCompatActivity() {
                         }
                         setCancelable(true)
                     }.create().show()
-
                     dialog.dismiss()
                 }
                 .create()
                 .show()
         }
+    }
 
+    private fun successSound() {
+        val successSound = MediaPlayer.create(this@SettingsActivity, R.raw.success_sound)
+        successSound.start()
     }
 
     private fun splitImage(imageView: ImageView?, number: Int): ArrayList<PuzzlePiece> {
@@ -266,11 +258,10 @@ class SettingsActivity : AppCompatActivity() {
 
         if (screenOrientationIsPortrait()) {
             columns = number
-            rows = columns * 4 / 3
-
+            rows = (columns * bigSideOfImageView) / smallSideOfImageView
         } else {
             rows = number
-            columns = rows * 4 / 3
+            columns = (rows * bigSideOfImageView) / smallSideOfImageView
         }
         val piecesNumber = columns * rows
         val pieces = ArrayList<PuzzlePiece>(piecesNumber)
@@ -302,20 +293,16 @@ class SettingsActivity : AppCompatActivity() {
                     pieceWidth + offsetX,
                     pieceHeight + offsetY
                 )
-
                 val piece = PuzzlePiece(applicationContext)
                 piece.setImageBitmap(pieceBitmap)
                 piece.pieceData.xCoord = xCoord - offsetX + imageView.left
                 piece.pieceData.yCoord = yCoord - offsetY + imageView.top
-
                 piece.pieceData.pieceWidth = pieceWidth + offsetX
                 piece.pieceData.pieceHeight = pieceHeight + offsetY
-
                 //this bitmap will hold our final puzzle piece image
                 val puzzlePiece = Bitmap.createBitmap(
                     pieceWidth + offsetX, pieceHeight + offsetY, Bitmap.Config.ARGB_8888
                 )
-
                 //draw path
                 val bumpSize = pieceHeight / 4
                 val canvas = Canvas(puzzlePiece)
@@ -324,98 +311,31 @@ class SettingsActivity : AppCompatActivity() {
 
                 if (row == 0) {
                     //top side piece
-                    path.lineTo(
-                        pieceBitmap.width.toFloat(),
-                        offsetY.toFloat()
-                    )
+                    topSidePiece(path, pieceBitmap, offsetY)
                 } else {
                     //top bump
-                    path.lineTo(
-                        (offsetX + (pieceBitmap.width - offsetX) / 3).toFloat(),
-                        offsetY.toFloat()
-                    )
-                    path.cubicTo(
-                        ((offsetX + (pieceBitmap.width - offsetX) / 6).toFloat()),
-                        (offsetY - bumpSize).toFloat(),
-                        ((offsetX + (pieceBitmap.width - offsetX) / 6 * 5)).toFloat(),
-                        (offsetY - bumpSize).toFloat(),
-                        (offsetX + (pieceBitmap.width - offsetX) / 3 * 2).toFloat(),
-                        offsetY.toFloat()
-                    )
-
-                    path.lineTo(pieceBitmap.width.toFloat(), offsetY.toFloat())
+                    topBump(path, offsetX, pieceBitmap, offsetY, bumpSize)
                 }
                 if (column == columns - 1) {
                     //right side piece
-                    path.lineTo(
-                        pieceBitmap.width.toFloat(),
-                        pieceBitmap.height.toFloat()
-                    )
+                    rightSidePiece(path, pieceBitmap)
                 } else {
                     //right bump
-                    path.lineTo(
-                        pieceBitmap.width.toFloat(),
-                        (offsetY + (pieceBitmap.height - offsetY) / 3).toFloat()
-                    )
-                    path.cubicTo(
-                        (pieceBitmap.width - bumpSize).toFloat(),
-                        (offsetY + (pieceBitmap.height - offsetY) / 6).toFloat(),
-                        (pieceBitmap.width - bumpSize).toFloat(),
-                        (offsetY + (pieceBitmap.height - offsetY) / 6 * 5).toFloat(),
-                        pieceBitmap.width.toFloat(),
-                        (offsetY + (pieceBitmap.height - offsetY) / 3 * 2).toFloat()
-                    )
-
-                    path.lineTo(
-                        pieceBitmap.width.toFloat(),
-                        pieceBitmap.height.toFloat()
-                    )
+                    rightBump(path, pieceBitmap, offsetY, bumpSize)
                 }
                 if (row == rows - 1) {
                     //bottom side piece
-                    path.lineTo(
-                        offsetX.toFloat(), pieceBitmap.height.toFloat()
-                    )
+                    bottomSidePiece(path, offsetX, pieceBitmap)
                 } else {
                     //bottom bump
-                    path.lineTo(
-                        (offsetX + (pieceBitmap.width - offsetX) / 3 * 2).toFloat(),
-                        pieceBitmap.height.toFloat()
-                    )
-
-                    path.cubicTo(
-                        (offsetX + (pieceBitmap.width - offsetX) / 6 * 5).toFloat(),
-                        (pieceBitmap.height - bumpSize).toFloat(),
-                        (offsetX + (pieceBitmap.width - offsetX) / 6).toFloat(),
-                        (pieceBitmap.height - bumpSize).toFloat(),
-                        (offsetX + (pieceBitmap.width - offsetX) / 3).toFloat(),
-                        pieceBitmap.height.toFloat()
-                    )
-
-                    path.lineTo(
-                        offsetX.toFloat(),
-                        pieceBitmap.height.toFloat()
-                    )
+                    bottomBump(path, offsetX, pieceBitmap, bumpSize)
                 }
                 if (column == 0) {
                     //left side piece
                     path.close()
                 } else {
                     //left bump
-                    path.lineTo(
-                        offsetX.toFloat(),
-                        (offsetY + (pieceBitmap.height - offsetY) / 3 * 2).toFloat(),
-                    )
-                    path.cubicTo(
-                        (offsetX - bumpSize).toFloat(),
-                        (offsetY + (pieceBitmap.height - offsetY) / 6 * 5).toFloat(),
-                        (offsetX - bumpSize).toFloat(),
-                        (offsetY + (pieceBitmap.height - offsetY) / 6).toFloat(),
-                        offsetX.toFloat(),
-                        (offsetY + (pieceBitmap.height - offsetY) / 3).toFloat()
-                    )
-
-                    path.close()
+                    leftBump(path, offsetX, offsetY, pieceBitmap, bumpSize)
                 }
 
                 //mask the piece
@@ -450,6 +370,126 @@ class SettingsActivity : AppCompatActivity() {
         return pieces
     }
 
+    private fun leftBump(
+        path: Path,
+        offsetX: Int,
+        offsetY: Int,
+        pieceBitmap: Bitmap,
+        bumpSize: Int
+    ) {
+        path.lineTo(
+            offsetX.toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / 3 * 2).toFloat(),
+        )
+        path.cubicTo(
+            (offsetX - bumpSize).toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / 6 * 5).toFloat(),
+            (offsetX - bumpSize).toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / 6).toFloat(),
+            offsetX.toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / 3).toFloat()
+        )
+        path.close()
+    }
+
+    private fun bottomBump(
+        path: Path,
+        offsetX: Int,
+        pieceBitmap: Bitmap,
+        bumpSize: Int
+    ) {
+        path.lineTo(
+            (offsetX + (pieceBitmap.width - offsetX) / 3 * 2).toFloat(),
+            pieceBitmap.height.toFloat()
+        )
+        path.cubicTo(
+            (offsetX + (pieceBitmap.width - offsetX) / 6 * 5).toFloat(),
+            (pieceBitmap.height - bumpSize).toFloat(),
+            (offsetX + (pieceBitmap.width - offsetX) / 6).toFloat(),
+            (pieceBitmap.height - bumpSize).toFloat(),
+            (offsetX + (pieceBitmap.width - offsetX) / 3).toFloat(),
+            pieceBitmap.height.toFloat()
+        )
+        path.lineTo(
+            offsetX.toFloat(),
+            pieceBitmap.height.toFloat()
+        )
+    }
+
+    private fun rightBump(
+        path: Path,
+        pieceBitmap: Bitmap,
+        offsetY: Int,
+        bumpSize: Int
+    ) {
+        path.lineTo(
+            pieceBitmap.width.toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / 3).toFloat()
+        )
+        path.cubicTo(
+            (pieceBitmap.width - bumpSize).toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / 6).toFloat(),
+            (pieceBitmap.width - bumpSize).toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / 6 * 5).toFloat(),
+            pieceBitmap.width.toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / 3 * 2).toFloat()
+        )
+        path.lineTo(
+            pieceBitmap.width.toFloat(),
+            pieceBitmap.height.toFloat()
+        )
+    }
+
+    private fun rightSidePiece(path: Path, pieceBitmap: Bitmap) {
+        path.lineTo(
+            pieceBitmap.width.toFloat(),
+            pieceBitmap.height.toFloat()
+        )
+    }
+
+    private fun bottomSidePiece(
+        path: Path,
+        offsetX: Int,
+        pieceBitmap: Bitmap
+    ) {
+        path.lineTo(
+            offsetX.toFloat(), pieceBitmap.height.toFloat()
+        )
+    }
+
+    private fun topBump(
+        path: Path,
+        offsetX: Int,
+        pieceBitmap: Bitmap,
+        offsetY: Int,
+        bumpSize: Int
+    ) {
+        path.lineTo(
+            (offsetX + (pieceBitmap.width - offsetX) / 3).toFloat(),
+            offsetY.toFloat()
+        )
+        path.cubicTo(
+            ((offsetX + (pieceBitmap.width - offsetX) / 6).toFloat()),
+            (offsetY - bumpSize).toFloat(),
+            ((offsetX + (pieceBitmap.width - offsetX) / 6 * 5)).toFloat(),
+            (offsetY - bumpSize).toFloat(),
+            (offsetX + (pieceBitmap.width - offsetX) / 3 * 2).toFloat(),
+            offsetY.toFloat()
+        )
+        path.lineTo(pieceBitmap.width.toFloat(), offsetY.toFloat())
+    }
+
+    private fun topSidePiece(
+        path: Path,
+        pieceBitmap: Bitmap,
+        offsetY: Int
+    ) {
+        path.lineTo(
+            pieceBitmap.width.toFloat(),
+            offsetY.toFloat()
+        )
+    }
+
 
     fun onButtonClick(view: View) {
         clickSound()
@@ -467,14 +507,12 @@ class SettingsActivity : AppCompatActivity() {
 
         val touchListener = TouchListener(this@SettingsActivity)
 
-        if (pieces != null) isPiecesShow = true
-
         //shuffle pieces order
         pieces?.shuffle()
+
         for (piece in pieces!!) {
             piece.setOnTouchListener(touchListener)
             containerLayout!!.addView(piece)
-
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
             if (screenOrientationIsPortrait()) {
                 //randomize position on the bottom of screen
@@ -482,18 +520,14 @@ class SettingsActivity : AppCompatActivity() {
                     containerLayout!!.width - piece.pieceData.pieceWidth
                 )
                 lParams.topMargin = containerLayout!!.height - piece.pieceData.pieceHeight
-
                 piece.layoutParams = lParams
-
             } else {
                 //randomize position on the right of screen
                 lParams.topMargin = Random.nextInt(
                     containerLayout!!.height - piece.pieceData.pieceHeight
                 )
                 lParams.leftMargin = containerLayout!!.width - piece.pieceData.pieceWidth
-
                 piece.layoutParams = lParams
-
             }
         }
     }
@@ -503,16 +537,11 @@ class SettingsActivity : AppCompatActivity() {
 
         for (piece in pieces!!) {
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
-
             if (piece.pieceData.canMove) {
                 if (screenOrientationIsPortrait()
                     && (lParams.topMargin != containerLayout!!.height - piece.pieceData.pieceHeight)
                 ) {
                     //this is the place for the animation code
-
-
-
-
 
 
                     //randomize position on the bottom of screen
@@ -525,10 +554,6 @@ class SettingsActivity : AppCompatActivity() {
                     && lParams.leftMargin != containerLayout!!.width - piece.pieceData.pieceWidth
                 ) {
                     //this is the place for the animation code
-
-
-
-
 
 
                     //randomize position on the right of screen
@@ -551,11 +576,9 @@ class SettingsActivity : AppCompatActivity() {
         AlertDialog.Builder(this).apply {
             setTitle(getString(R.string.confirmation))
             setMessage(getString(R.string.are_you_sure))
-
             setPositiveButton(getString(R.string.yes)) { _, _ ->
                 super.onBackPressed()
             }
-
             setNegativeButton(getString(R.string.no)) { _, _ ->
             }
             setCancelable(true)
