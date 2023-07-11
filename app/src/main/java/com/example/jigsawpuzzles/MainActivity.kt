@@ -270,6 +270,7 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         AlertDialog.Builder(this).apply {
             setTitle(getString(R.string.confirmation))
+            setIcon(R.drawable.ic_warning_24)
             setMessage(getString(R.string.are_you_sure))
             setPositiveButton(getString(R.string.yes)) { _, _ ->
                 super.onBackPressed()
