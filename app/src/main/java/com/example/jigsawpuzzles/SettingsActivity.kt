@@ -1,6 +1,5 @@
 package com.example.jigsawpuzzles
 
-import android.animation.ObjectAnimator
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
@@ -14,18 +13,16 @@ import android.view.Display
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
-import android.view.animation.TranslateAnimation
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.example.jigsawpuzzles.databinding.ActivitySettingsBinding
 import com.example.jigsawpuzzles.extentions.PuzzlePathView
-import kotlinx.coroutines.delay
 import kotlin.random.Random
+
 
 class SettingsActivity : AppCompatActivity() {
     lateinit var binding: ActivitySettingsBinding
@@ -227,7 +224,6 @@ class SettingsActivity : AppCompatActivity() {
                 .setMessage(getString(R.string.you_won_message) + "\n" + getString(R.string.you_won_question))
                 .setPositiveButton(getString(R.string.yes)) { dialog, _ ->
                     startActivity(intent)
-                    dialog.dismiss()
                     finish()
                 }
                 .setNegativeButton(getString(R.string.no)) { dialog, _ ->
@@ -240,15 +236,13 @@ class SettingsActivity : AppCompatActivity() {
                         }
                         setNegativeButton(getString(R.string.no)) { _, _ ->
                             startActivity(intent)
-                            dialog.dismiss()
                             finish()
                         }
-                        setCancelable(true)
+                        setCancelable(false)
                     }.create().show()
-                    dialog.dismiss()
                 }
-                .create()
-                .show()
+                .setCancelable(false)
+                .create().show()
         }
     }
 
@@ -547,36 +541,13 @@ class SettingsActivity : AppCompatActivity() {
                     && (lParams.topMargin != containerLayout!!.height - piece.pieceData.pieceHeight)
                 ) {
                     //this is the place for the animation code
-//                    startRotate(piece)
-                    /**
-                     * fromX
-                     * toX
-                     * fromY
-                     * toY**/
+
+
                     //randomize position on the bottom of screen
-                    startTranslate(
-                        piece,
-                        piece.pieceData.x.toFloat(),
-                        lParams.leftMargin.toFloat(),
-                        piece.pieceData.y.toFloat(),
-                        lParams.topMargin.toFloat(),
-                        lParams
-                    )
-
-
                     lParams.leftMargin =
                         Random.nextInt(containerLayout!!.width - piece.pieceData.pieceWidth)
                     lParams.topMargin = containerLayout!!.height - piece.pieceData.pieceHeight
                     piece.layoutParams = lParams
-
-
-
-
-
-
-                    startTranslateXY(piece)
-
-
                 } else if (!screenOrientationIsPortrait()
                     && lParams.leftMargin != containerLayout!!.width - piece.pieceData.pieceWidth
                 ) {
@@ -587,37 +558,10 @@ class SettingsActivity : AppCompatActivity() {
                     lParams.topMargin =
                         Random.nextInt(containerLayout!!.height - piece.pieceData.pieceHeight)
                     lParams.leftMargin = containerLayout!!.width - piece.pieceData.pieceWidth
-
-//                    piece.layoutParams = lParams
+                    piece.layoutParams = lParams
                 }
             }
         }
-    }
-
-    fun startTranslate(tv_target: View,fromX:Float,toX:Float, fromY:Float,toY:Float,lParams: RelativeLayout.LayoutParams) {
-        val translateAnimation = TranslateAnimation(fromX, toX, fromY, toY)
-        translateAnimation.duration = 500
-        tv_target.startAnimation(translateAnimation)
-        tv_target.layoutParams = lParams
-    }
-
-    fun startRotate(view: View) {
-        val rotateAnimator = ObjectAnimator.ofFloat(view, "rotation", 0f, 360f)
-        rotateAnimator.duration = 1000
-        rotateAnimator.start()
-    }
-
-    fun startTranslateXY(view: View) {
-        val currentX: Float = view.translationX
-        val currentY: Float = view.translationY
-        val translateXAnimator =
-            ObjectAnimator.ofFloat(view, "translationX", currentX, 0f, currentX)
-        translateXAnimator.duration = 1000
-        translateXAnimator.start()
-        val translateYAnimator =
-            ObjectAnimator.ofFloat(view, "translationY", currentY, -500f, currentY)
-        translateYAnimator.duration = 1000
-        translateYAnimator.start()
     }
 
 
@@ -637,7 +581,7 @@ class SettingsActivity : AppCompatActivity() {
             }
             setNegativeButton(getString(R.string.no)) { _, _ ->
             }
-            setCancelable(true)
+            setCancelable(false)
         }.create().show()
     }
 
