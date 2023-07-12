@@ -277,7 +277,7 @@ class MainActivity : AppCompatActivity() {
             }
             setNegativeButton(getString(R.string.no)) { _, _ ->
             }
-            setCancelable(true)
+            setCancelable(false)
         }.create().show()
     }
 
