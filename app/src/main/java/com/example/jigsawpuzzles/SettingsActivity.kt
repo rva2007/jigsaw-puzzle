@@ -27,7 +27,6 @@ import kotlin.random.Random
 class SettingsActivity : AppCompatActivity() {
     lateinit var binding: ActivitySettingsBinding
     private var pieces: ArrayList<PuzzlePiece>? = null
-    private var isPiecesShow: Boolean = false
     private var containerLayout: RelativeLayout? = null
     private var imageView: ImageView? = null
     private var puzzlePathView: ImageView? = null
@@ -78,7 +77,7 @@ class SettingsActivity : AppCompatActivity() {
         val screenWidth: Int = point.x
         val screenHeight: Int = point.y
         //here get target dimensions
-        if (screenOrientationIsPortrait()) {
+        if (isScreenOrientationPortrait()) {
             //targetWidth is 80% from screenWidth
             targetWidth = screenWidth - ((screenWidth / 100) * 20)
             targetHeight = (targetWidth!! / smallSideOfImageView) * bigSideOfImageView
@@ -132,7 +131,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         imageView?.post {
-            if (!screenOrientationIsPortrait()) {
+            if (!isScreenOrientationPortrait()) {
                 val matrix = Matrix()
                 matrix.postRotate(-90f)
                 bitmap = Bitmap.createBitmap(
@@ -151,7 +150,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun screenOrientationIsPortrait(): Boolean {
+    private fun isScreenOrientationPortrait(): Boolean {
         return when (resources.configuration.orientation) {
             Configuration.ORIENTATION_PORTRAIT -> true
             else -> false
@@ -187,7 +186,7 @@ class SettingsActivity : AppCompatActivity() {
             seekBar: SeekBar, progress: Int,
             fromUser: Boolean
         ) {
-            clickSound()
+            playSoundClick()
             columns = seekBar.progress
             rows = (columns!! * bigSideOfImageView) / smallSideOfImageView
             complexity = columns!! * rows!!
@@ -205,7 +204,7 @@ class SettingsActivity : AppCompatActivity() {
     private val isGameOver: Boolean
         get() {
             for (piece in pieces!!) {
-                if (piece.pieceData.canMove) {
+                if (piece.dataOfPiece.canMove) {
                     return false
                 }
             }
@@ -216,7 +215,7 @@ class SettingsActivity : AppCompatActivity() {
     fun checkGameOver() {
         if (isGameOver) {
             val intent = Intent(this@SettingsActivity, MainActivity::class.java)
-            successSound()
+            playSuccessSound()
 
             AlertDialog.Builder(this@SettingsActivity)
                 .setTitle(getString(R.string.you_won_title))
@@ -246,16 +245,16 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun successSound() {
+    private fun playSuccessSound() {
         val successSound = MediaPlayer.create(this@SettingsActivity, R.raw.success_sound)
         successSound.start()
     }
 
-    private fun splitImage(imageView: ImageView?, number: Int): ArrayList<PuzzlePiece> {
+    private fun onImageSplit(imageView: ImageView?, number: Int): ArrayList<PuzzlePiece> {
         val columns: Int
         val rows: Int
 
-        if (screenOrientationIsPortrait()) {
+        if (isScreenOrientationPortrait()) {
             columns = number
             rows = (columns * bigSideOfImageView) / smallSideOfImageView
         } else {
@@ -294,10 +293,10 @@ class SettingsActivity : AppCompatActivity() {
                 )
                 val piece = PuzzlePiece(applicationContext)
                 piece.setImageBitmap(pieceBitmap)
-                piece.pieceData.xCoord = xCoord - offsetX + imageView.left
-                piece.pieceData.yCoord = yCoord - offsetY + imageView.top
-                piece.pieceData.pieceWidth = pieceWidth + offsetX
-                piece.pieceData.pieceHeight = pieceHeight + offsetY
+                piece.dataOfPiece.xCoord = xCoord - offsetX + imageView.left
+                piece.dataOfPiece.yCoord = yCoord - offsetY + imageView.top
+                piece.dataOfPiece.pieceWidth = pieceWidth + offsetX
+                piece.dataOfPiece.pieceHeight = pieceHeight + offsetY
                 //this bitmap will hold our final puzzle piece image
                 val puzzlePiece = Bitmap.createBitmap(
                     pieceWidth + offsetX, pieceHeight + offsetY, Bitmap.Config.ARGB_8888
@@ -309,32 +308,32 @@ class SettingsActivity : AppCompatActivity() {
                 path.moveTo(offsetX.toFloat(), offsetY.toFloat())
 
                 if (row == 0) {
-                    //top side piece
-                    topSidePiece(path, pieceBitmap, offsetY)
+                    //top piece side
+                    drawTopPieceSide(path, pieceBitmap, offsetY)
                 } else {
                     //top bump
-                    topBump(path, offsetX, pieceBitmap, offsetY, bumpSize)
+                    drawTopBump(path, offsetX, pieceBitmap, offsetY, bumpSize)
                 }
                 if (column == columns - 1) {
-                    //right side piece
-                    rightSidePiece(path, pieceBitmap)
+                    //right piece side
+                    drawRightPieceSide(path, pieceBitmap)
                 } else {
                     //right bump
-                    rightBump(path, pieceBitmap, offsetY, bumpSize)
+                    drawRightBump(path, pieceBitmap, offsetY, bumpSize)
                 }
                 if (row == rows - 1) {
-                    //bottom side piece
-                    bottomSidePiece(path, offsetX, pieceBitmap)
+                    //bottom piece side
+                    drawBottomPieceSide(path, offsetX, pieceBitmap)
                 } else {
                     //bottom bump
-                    bottomBump(path, offsetX, pieceBitmap, bumpSize)
+                    drawBottomBump(path, offsetX, pieceBitmap, bumpSize)
                 }
                 if (column == 0) {
-                    //left side piece
+                    //left piece side
                     path.close()
                 } else {
                     //left bump
-                    leftBump(path, offsetX, offsetY, pieceBitmap, bumpSize)
+                    drawLeftBump(path, offsetX, offsetY, pieceBitmap, bumpSize)
                 }
 
                 //mask the piece
@@ -369,7 +368,7 @@ class SettingsActivity : AppCompatActivity() {
         return pieces
     }
 
-    private fun leftBump(
+    private fun drawLeftBump(
         path: Path,
         offsetX: Int,
         offsetY: Int,
@@ -391,7 +390,7 @@ class SettingsActivity : AppCompatActivity() {
         path.close()
     }
 
-    private fun bottomBump(
+    private fun drawBottomBump(
         path: Path,
         offsetX: Int,
         pieceBitmap: Bitmap,
@@ -415,7 +414,7 @@ class SettingsActivity : AppCompatActivity() {
         )
     }
 
-    private fun rightBump(
+    private fun drawRightBump(
         path: Path,
         pieceBitmap: Bitmap,
         offsetY: Int,
@@ -439,14 +438,14 @@ class SettingsActivity : AppCompatActivity() {
         )
     }
 
-    private fun rightSidePiece(path: Path, pieceBitmap: Bitmap) {
+    private fun drawRightPieceSide(path: Path, pieceBitmap: Bitmap) {
         path.lineTo(
             pieceBitmap.width.toFloat(),
             pieceBitmap.height.toFloat()
         )
     }
 
-    private fun bottomSidePiece(
+    private fun drawBottomPieceSide(
         path: Path,
         offsetX: Int,
         pieceBitmap: Bitmap
@@ -456,7 +455,7 @@ class SettingsActivity : AppCompatActivity() {
         )
     }
 
-    private fun topBump(
+    private fun drawTopBump(
         path: Path,
         offsetX: Int,
         pieceBitmap: Bitmap,
@@ -478,7 +477,7 @@ class SettingsActivity : AppCompatActivity() {
         path.lineTo(pieceBitmap.width.toFloat(), offsetY.toFloat())
     }
 
-    private fun topSidePiece(
+    private fun drawTopPieceSide(
         path: Path,
         pieceBitmap: Bitmap,
         offsetY: Int
@@ -491,7 +490,7 @@ class SettingsActivity : AppCompatActivity() {
 
 
     fun onButtonClick(view: View) {
-        clickSound()
+        playSoundClick()
         imageView?.bringToFront()
         imageView?.alpha = 0.3f
         containerLayout?.bringToFront()
@@ -502,7 +501,7 @@ class SettingsActivity : AppCompatActivity() {
         backPuzzle?.isVisible = true
 
         //get list of puzzles
-        pieces = splitImage(imageView!!, columns!!)
+        pieces = onImageSplit(imageView!!, columns!!)
 
         val touchListener = TouchListener(this@SettingsActivity)
 
@@ -513,51 +512,51 @@ class SettingsActivity : AppCompatActivity() {
             piece.setOnTouchListener(touchListener)
             containerLayout!!.addView(piece)
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
-            if (screenOrientationIsPortrait()) {
+            if (isScreenOrientationPortrait()) {
                 //randomize position on the bottom of screen
                 lParams.leftMargin = Random.nextInt(
-                    containerLayout!!.width - piece.pieceData.pieceWidth
+                    containerLayout!!.width - piece.dataOfPiece.pieceWidth
                 )
-                lParams.topMargin = containerLayout!!.height - piece.pieceData.pieceHeight
+                lParams.topMargin = containerLayout!!.height - piece.dataOfPiece.pieceHeight
                 piece.layoutParams = lParams
             } else {
                 //randomize position on the right of screen
                 lParams.topMargin = Random.nextInt(
-                    containerLayout!!.height - piece.pieceData.pieceHeight
+                    containerLayout!!.height - piece.dataOfPiece.pieceHeight
                 )
-                lParams.leftMargin = containerLayout!!.width - piece.pieceData.pieceWidth
+                lParams.leftMargin = containerLayout!!.width - piece.dataOfPiece.pieceWidth
                 piece.layoutParams = lParams
             }
         }
     }
 
     fun onBackPuzzleClick(view: View) {
-        clickSound()
+        playSoundClick()
 
         for (piece in pieces!!) {
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
-            if (piece.pieceData.canMove) {
-                if (screenOrientationIsPortrait()
-                    && (lParams.topMargin != containerLayout!!.height - piece.pieceData.pieceHeight)
+            if (piece.dataOfPiece.canMove) {
+                if (isScreenOrientationPortrait()
+                    && (lParams.topMargin != containerLayout!!.height - piece.dataOfPiece.pieceHeight)
                 ) {
                     //this is the place for the animation code
 
 
                     //randomize position on the bottom of screen
                     lParams.leftMargin =
-                        Random.nextInt(containerLayout!!.width - piece.pieceData.pieceWidth)
-                    lParams.topMargin = containerLayout!!.height - piece.pieceData.pieceHeight
+                        Random.nextInt(containerLayout!!.width - piece.dataOfPiece.pieceWidth)
+                    lParams.topMargin = containerLayout!!.height - piece.dataOfPiece.pieceHeight
                     piece.layoutParams = lParams
-                } else if (!screenOrientationIsPortrait()
-                    && lParams.leftMargin != containerLayout!!.width - piece.pieceData.pieceWidth
+                } else if (!isScreenOrientationPortrait()
+                    && lParams.leftMargin != containerLayout!!.width - piece.dataOfPiece.pieceWidth
                 ) {
                     //this is the place for the animation code
 
 
                     //randomize position on the right of screen
                     lParams.topMargin =
-                        Random.nextInt(containerLayout!!.height - piece.pieceData.pieceHeight)
-                    lParams.leftMargin = containerLayout!!.width - piece.pieceData.pieceWidth
+                        Random.nextInt(containerLayout!!.height - piece.dataOfPiece.pieceHeight)
+                    lParams.leftMargin = containerLayout!!.width - piece.dataOfPiece.pieceWidth
                     piece.layoutParams = lParams
                 }
             }
@@ -565,7 +564,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
 
-    private fun clickSound() {
+    private fun playSoundClick() {
         val clickSound = MediaPlayer.create(this@SettingsActivity, R.raw.click_sound)
         clickSound.start()
     }

@@ -54,8 +54,8 @@ class MainActivity : AppCompatActivity() {
             gridView.adapter = GridViewAdapter(this@MainActivity)
             gridView.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->
-                    clickSound()
-                    bitmap = assetsBitmap("img/" + (files!![i % files.size]).toString())
+                    playClickSound()
+                    bitmap = getAssetsBitmap("img/" + (files!![i % files.size]).toString())
                     val intent = Intent(applicationContext, SettingsActivity::class.java)
                     intent.putExtra("orientation", getOrientationScreen(bitmap!!))
                     resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun clickSound() {
+    private fun playClickSound() {
         val clickSound = MediaPlayer.create(this@MainActivity, R.raw.click_sound)
         clickSound.start()
     }
@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         return orientation
     }
 
-    private fun assetsBitmap(str: String): Bitmap? {
+    private fun getAssetsBitmap(str: String): Bitmap? {
         val inputStream: InputStream
         var bitmap: Bitmap? = null
         try {
@@ -229,7 +229,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun onImageCameraClicked(view: View) {
+    fun onCameraImageClicked(view: View) {
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.CAMERA
@@ -241,13 +241,13 @@ class MainActivity : AppCompatActivity() {
                 CAMERA_REQUEST
             )
         } else {
-            clickSound()
+            playClickSound()
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             startActivityForResult(intent, CAMERA_REQUEST)
         }
     }
 
-    fun onImageGalleryClicked(view: View) {
+    fun onGalleryImageClicked(view: View) {
         if (ContextCompat.checkSelfPermission(
                 this@MainActivity,
                 Manifest.permission.READ_EXTERNAL_STORAGE
@@ -259,7 +259,7 @@ class MainActivity : AppCompatActivity() {
                 ), REQUEST_PERMISSION_READ_EXTERNAL_STORAGE
             )
         } else {
-            clickSound()
+            playClickSound()
             val intent = Intent(Intent.ACTION_GET_CONTENT)
             intent.type = "image/*"
             startActivityForResult(intent, GALLERY_REQUEST)
