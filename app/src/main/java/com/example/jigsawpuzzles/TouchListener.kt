@@ -24,7 +24,7 @@ class TouchListener(private val activity: SettingsActivity) : View.OnTouchListen
 
         val piece = view as PuzzlePiece
 
-        if (!piece.pieceData.canMove) {
+        if (!piece.dataOfPiece.canMove) {
             return true
         }
 
@@ -43,27 +43,31 @@ class TouchListener(private val activity: SettingsActivity) : View.OnTouchListen
             }
             MotionEvent.ACTION_UP -> {
                 val xDiff = StrictMath.abs(
-                    piece.pieceData.xCoord - lParams.leftMargin
+                    piece.dataOfPiece.xCoord - lParams.leftMargin
                 )
                 val yDiff = StrictMath.abs(
-                    piece.pieceData.yCoord - lParams.topMargin
+                    piece.dataOfPiece.yCoord - lParams.topMargin
                 )
-                piece.pieceData.x = piece.x.toInt()
-                piece.pieceData.y = piece.y.toInt()
+                piece.dataOfPiece.x = piece.x.toInt()
+                piece.dataOfPiece.y = piece.y.toInt()
 
                 if (xDiff <= tolerance && yDiff <= tolerance) {
-                    val fitSound = MediaPlayer.create(this.activity,R.raw.fit_sound)
-                    fitSound.start()
-                    lParams.leftMargin = piece.pieceData.xCoord
-                    lParams.topMargin = piece.pieceData.yCoord
+                    playSoundFit()
+                    lParams.leftMargin = piece.dataOfPiece.xCoord
+                    lParams.topMargin = piece.dataOfPiece.yCoord
                     piece.layoutParams = lParams
-                    piece.pieceData.canMove = false
+                    piece.dataOfPiece.canMove = false
                     sendViewToBack(piece)
                     activity.checkGameOver()
                 }
             }
         }
         return true
+    }
+
+    private fun playSoundFit() {
+        val fitSound = MediaPlayer.create(this.activity, R.raw.fit_sound)
+        fitSound.start()
     }
 
     private fun sendViewToBack(child: View) {

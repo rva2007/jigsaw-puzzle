@@ -38,7 +38,7 @@ class PuzzlePathView @JvmOverloads constructor(
         val smallSideOfPuzzlePathView = 3
         val pathOfView = Path()
 
-        if (screenOrientationIsPortrait()) {
+        if (isScreenOrientationPortrait()) {
             columns = num
             rows = (columns * bigSideOfPuzzlePathView) / smallSideOfPuzzlePathView
         } else {
@@ -62,31 +62,31 @@ class PuzzlePathView @JvmOverloads constructor(
 
                 if (row == 0) {
                     //top side piece
-                    topSidePiece(pathOfPiece, xCoord, pieceWidth, yCoord)
+                    createTopSidePiece(pathOfPiece, xCoord, pieceWidth, yCoord)
                 } else {
                     //top bump
-                    topBump(pathOfPiece, xCoord, pieceWidth, yCoord, bumpSize)
+                    createTopBump(pathOfPiece, xCoord, pieceWidth, yCoord, bumpSize)
                 }
                 if (column == columns - 1) {
                     //right side piece
-                    rightSidePiece(pathOfPiece, xCoord, pieceWidth, yCoord, pieceHeight)
+                    createRightSideOfPiece(pathOfPiece, xCoord, pieceWidth, yCoord, pieceHeight)
                 } else {
                     //right bump
-                    rightBump(pathOfPiece, xCoord, pieceWidth, yCoord, pieceHeight, bumpSize)
+                    createRightBump(pathOfPiece, xCoord, pieceWidth, yCoord, pieceHeight, bumpSize)
                 }
                 if (row == rows - 1) {
                     //bottom side piece
-                    bottomSidePiece(pathOfPiece, xCoord, yCoord, pieceHeight)
+                    createBottomSideOfPiece(pathOfPiece, xCoord, yCoord, pieceHeight)
                 } else {
                     //bottom bump
-                    bottomBump(pathOfPiece, xCoord, pieceWidth, yCoord, pieceHeight, bumpSize)
+                    createBottomBump(pathOfPiece, xCoord, pieceWidth, yCoord, pieceHeight, bumpSize)
                 }
                 if (column == 0) {
                     //left side piece
                     pathOfPiece.close()
                 } else {
                     //left bump
-                    leftBump(pathOfPiece, xCoord, yCoord, pieceHeight, bumpSize)
+                    createLeftBump(pathOfPiece, xCoord, yCoord, pieceHeight, bumpSize)
                     pathOfPiece.close()
                 }
                 pathOfView.addPath(pathOfPiece)
@@ -98,7 +98,7 @@ class PuzzlePathView @JvmOverloads constructor(
         return pathOfView
     }
 
-    private fun leftBump(path: Path, xCoord: Int, yCoord: Int, pieceHeight: Int, bumpSize: Int) {
+    private fun createLeftBump(path: Path, xCoord: Int, yCoord: Int, pieceHeight: Int, bumpSize: Int) {
         path.lineTo(
             xCoord.toFloat(),
             (yCoord + pieceHeight / 3 * 2).toFloat(),
@@ -113,7 +113,7 @@ class PuzzlePathView @JvmOverloads constructor(
         )
     }
 
-    private fun bottomBump(
+    private fun createBottomBump(
         path: Path,
         xCoord: Int,
         pieceWidth: Int,
@@ -139,7 +139,7 @@ class PuzzlePathView @JvmOverloads constructor(
         )
     }
 
-    private fun bottomSidePiece(
+    private fun createBottomSideOfPiece(
         path: Path,
         xCoord: Int,
         yCoord: Int,
@@ -150,7 +150,7 @@ class PuzzlePathView @JvmOverloads constructor(
         )
     }
 
-    private fun rightBump(
+    private fun createRightBump(
         path: Path,
         xCoord: Int,
         pieceWidth: Int,
@@ -176,7 +176,7 @@ class PuzzlePathView @JvmOverloads constructor(
         )
     }
 
-    private fun rightSidePiece(
+    private fun createRightSideOfPiece(
         path: Path,
         xCoord: Int,
         pieceWidth: Int,
@@ -186,7 +186,7 @@ class PuzzlePathView @JvmOverloads constructor(
         path.lineTo(xCoord.toFloat() + pieceWidth, yCoord.toFloat() + pieceHeight)
     }
 
-    private fun topBump(
+    private fun createTopBump(
         path: Path,
         xCoord: Int,
         pieceWidth: Int,
@@ -205,7 +205,7 @@ class PuzzlePathView @JvmOverloads constructor(
         path.lineTo(xCoord.toFloat() + pieceWidth.toFloat(), yCoord.toFloat())
     }
 
-    private fun topSidePiece(
+    private fun createTopSidePiece(
         path: Path,
         xCoord: Int,
         pieceWidth: Int,
@@ -214,7 +214,7 @@ class PuzzlePathView @JvmOverloads constructor(
         path.lineTo(xCoord.toFloat() + pieceWidth, yCoord.toFloat())
     }
 
-    private fun screenOrientationIsPortrait(): Boolean {
+    private fun isScreenOrientationPortrait(): Boolean {
         return when (resources.configuration.orientation) {
             Configuration.ORIENTATION_PORTRAIT -> true
             else -> false
