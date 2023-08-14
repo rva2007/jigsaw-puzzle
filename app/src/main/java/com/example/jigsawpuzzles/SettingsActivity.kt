@@ -88,8 +88,8 @@ class SettingsActivity : AppCompatActivity() {
         backPuzzle?.isVisible = false
         puzzlePathView?.bringToFront()
         containerLayout = binding.containerLayout
-        tvComplexity = binding.tvComplexity
-        buttonContinue = binding.btnContinue
+        tvComplexity = binding.textViewComplexity
+        buttonContinue = binding.buttonContinue
         seekBar = binding.seekBar
 
         seekBar?.setOnSeekBarChangeListener(onSeekBarChangeListener)
@@ -186,7 +186,7 @@ class SettingsActivity : AppCompatActivity() {
             rows = (columns!! * bigSideOfImageView) / smallSideOfImageView
             complexity = columns!! * rows!!
             str = getString(R.string.complexity_text) + " $complexity"
-            binding.tvComplexity.text = str
+            binding.textViewComplexity.text = str
             binding.puzzlePathView.num = columns!!
             binding.puzzlePathView.invalidate()
         }

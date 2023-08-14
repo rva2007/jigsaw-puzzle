@@ -32,7 +32,7 @@ class GridViewAdapter(private val context: Context) : BaseAdapter() {
     @SuppressLint("ViewHolder")
     override fun getView(position: Int, view: View?, viewGroup: ViewGroup?): View {
         val mView = View.inflate(context, R.layout.gridview_item, null)
-        val imageView = mView.findViewById<ImageView>(R.id.idIVCourse)
+        val imageView = mView.findViewById<ImageView>(R.id.imageViewSource)
         imageView.post {
             val executor = Executors.newSingleThreadExecutor()
             val handler = Handler(Looper.getMainLooper())

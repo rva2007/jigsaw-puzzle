@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
         try {
             val files = assetManager.list("img")
-            val gridView = findViewById<GridView>(R.id.idGRV)
+            val gridView = findViewById<GridView>(R.id.grid_view)
             gridView.adapter = GridViewAdapter(this@MainActivity)
             gridView.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->

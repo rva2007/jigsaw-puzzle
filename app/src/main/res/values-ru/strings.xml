@@ -3,7 +3,7 @@
     <string name="app_name">Игра пазлы</string>
     <string name="title">Игра пазлы</string>
     <string name="camera_button">кнопка камеры</string>
-    <string name="gallery_button">кнопка галлереи</string>
+    <string name="gallery_button">кнопка галереи</string>
     <string name="continue_button">Продолжить</string>
     <string name="you_won_title">Хорошая работа!!!</string>
     <string name="you_won_message">Картинка собрана!</string>
