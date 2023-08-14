@@ -9,7 +9,7 @@ import android.media.MediaPlayer
 import android.media.ThumbnailUtils
 import android.os.Build
 import android.os.Bundle
-import android.view.Display
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -66,16 +66,11 @@ class SettingsActivity : AppCompatActivity() {
         //here hide the action bar
         supportActionBar?.hide()
 
-        //get Display from the WindowManager
-        val display: Display? = baseContext.display
-        val point = Point()
-        display?.getSize(point)
-
-        windowManager.currentWindowMetricsPointCompat()
-
         //here get dimensions device screen
-        val screenWidth: Int = point.x
-        val screenHeight: Int = point.y
+        val metrics: DisplayMetrics = this.getResources().getDisplayMetrics()
+        val screenWidth: Int = metrics.widthPixels
+        val screenHeight: Int = metrics.heightPixels
+
         //here get target dimensions
         if (isScreenOrientationPortrait()) {
             //targetWidth is 80% from screenWidth
