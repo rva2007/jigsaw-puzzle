@@ -5,7 +5,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class PPData(
+data class PuzzlePieceData(
     var id: Int = 0,
     var x: Int = 0,
     var y: Int = 0,
