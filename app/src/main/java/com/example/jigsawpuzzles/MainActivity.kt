@@ -17,23 +17,35 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.GridView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.jigsawpuzzles.databinding.ActivityMainBinding
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
+    lateinit var binding: ActivityMainBinding
     private var requestCode: Int? = null
     private var bitmap: Bitmap? = null
     private var matrix = Matrix()
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.buttonCamera.setOnClickListener {
+            onCameraImageClicked()
+        }
+        binding.buttonGallery.setOnClickListener {
+            onGalleryImageClicked()
+        }
 
         getImagesFromAssets()
     }
@@ -50,9 +62,9 @@ class MainActivity : AppCompatActivity() {
 
         try {
             val files = assetManager.list("img")
-            val gridView = findViewById<GridView>(R.id.grid_view)
-            gridView.adapter = GridViewAdapter(this@MainActivity)
-            gridView.onItemClickListener = AdapterView
+            val gridView = binding.gridView
+            gridView?.adapter = GridViewAdapter(this@MainActivity)
+            gridView?.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->
                     playClickSound()
                     bitmap = getAssetsBitmap("img/" + (files!![i % files.size]).toString())
@@ -203,6 +215,7 @@ class MainActivity : AppCompatActivity() {
                 ) != PackageManager.PERMISSION_GRANTED)
     }
 
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -229,7 +242,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun onCameraImageClicked(view: View) {
+    fun onCameraImageClicked() {
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.CAMERA
@@ -247,7 +260,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun onGalleryImageClicked(view: View) {
+    fun onGalleryImageClicked() {
         if (ContextCompat.checkSelfPermission(
                 this@MainActivity,
                 Manifest.permission.READ_EXTERNAL_STORAGE

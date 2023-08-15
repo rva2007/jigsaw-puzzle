@@ -10,7 +10,6 @@ import android.media.ThumbnailUtils
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.*
@@ -20,20 +19,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.example.jigsawpuzzles.databinding.ActivitySettingsBinding
-import com.example.jigsawpuzzles.extentions.PuzzlePathView
 import kotlin.random.Random
 
 
 class SettingsActivity : AppCompatActivity() {
-    lateinit var binding: ActivitySettingsBinding
+    private lateinit var binding: ActivitySettingsBinding
     private var pieces: ArrayList<PuzzlePiece>? = null
-    private var containerLayout: RelativeLayout? = null
-    private var imageView: ImageView? = null
-    private var puzzlePathView: ImageView? = null
-    private var backPuzzle: ImageView? = null
-    private var tvComplexity: TextView? = null
-    private var seekBar: SeekBar? = null
-    private var buttonContinue: Button? = null
     private var bitmapFromAssets: Bitmap? = null
     private var bitmapFromGallery: Bitmap? = null
     private var bitmapFromCamera: Bitmap? = null
@@ -42,12 +33,12 @@ class SettingsActivity : AppCompatActivity() {
     private var imageViewHeight: Int? = null
     private var targetWidth: Int? = null
     private var targetHeight: Int? = null
-    private var str: String? = null
+    private var textComplexity: String? = null
     private var columns: Int? = null
     private var rows: Int? = null
     private var complexity: Int? = null
-    val bigSideOfImageView = 4
-    val smallSideOfImageView = 3
+    private val bigSideOfImageView = 4
+    private val smallSideOfImageView = 3
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,8 +54,7 @@ class SettingsActivity : AppCompatActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //here hide the action bar
-        supportActionBar?.hide()
+        hideActionBar()
 
         //here get dimensions device screen
         val metrics: DisplayMetrics = this.getResources().getDisplayMetrics()
@@ -82,34 +72,35 @@ class SettingsActivity : AppCompatActivity() {
             targetWidth = (targetHeight!! / smallSideOfImageView) * bigSideOfImageView
         }
 
-        imageView = binding.settingsImageView
-        puzzlePathView = binding.puzzlePathView
-        backPuzzle = binding.backPuzzle
-        backPuzzle?.isVisible = false
-        puzzlePathView?.bringToFront()
-        containerLayout = binding.containerLayout
-        tvComplexity = binding.textViewComplexity
-        buttonContinue = binding.buttonContinue
-        seekBar = binding.seekBar
+        binding.battonBackPuzzle.isVisible = false
+        binding.battonBackPuzzle.setOnClickListener {
+            onButtonBackPuzzleClick()
+        }
+        binding.puzzlePathView.bringToFront()
 
-        seekBar?.setOnSeekBarChangeListener(onSeekBarChangeListener)
-        columns = seekBar!!.progress
+        binding.seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
+
+        binding.buttonContinue.setOnClickListener {
+            onButtonContinueClick()
+        }
+
+        columns = binding.seekBar.progress
 
         rows = columns!! * bigSideOfImageView / smallSideOfImageView
-        (puzzlePathView as PuzzlePathView).num = columns!!
+        binding.puzzlePathView.num = columns!!
         complexity = columns!! * rows!!
-        str = getString(R.string.complexity_text) + " $complexity"
-        tvComplexity!!.text = str
+        textComplexity = getString(R.string.complexity_text) + " $complexity"
+        binding.textViewComplexity.text = textComplexity
 
-        val params = imageView?.layoutParams
+        val params = binding.settingsImageView.layoutParams
         params?.width = targetWidth
         params?.height = targetHeight
-        imageView?.layoutParams = params
+        binding.settingsImageView.layoutParams = params
 
-        imageViewWidth = imageView?.layoutParams?.width
-        imageViewHeight = imageView?.layoutParams?.height
+        imageViewWidth = binding.settingsImageView.layoutParams?.width
+        imageViewHeight = binding.settingsImageView.layoutParams?.height
 
-        puzzlePathView?.layoutParams = params
+        binding.puzzlePathView.layoutParams = params
 
         bitmapFromAssets = intent.getParcelableExtra("assets")
         bitmapFromGallery = intent.getParcelableExtra("gallery")
@@ -125,7 +116,7 @@ class SettingsActivity : AppCompatActivity() {
             bitmap = bitmapFromCamera
         }
 
-        imageView?.post {
+        binding.settingsImageView.post {
             if (!isScreenOrientationPortrait()) {
                 val matrix = Matrix()
                 matrix.postRotate(-90f)
@@ -134,12 +125,20 @@ class SettingsActivity : AppCompatActivity() {
                 )
             }
             bitmap = ThumbnailUtils.extractThumbnail(bitmap, imageViewWidth!!, imageViewHeight!!)
-            imageView?.setImageBitmap(bitmap)
+            binding.settingsImageView.setImageBitmap(bitmap)
         }
+    }
+
+    private fun hideActionBar() {
+        supportActionBar?.hide()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        stopMediaPlayer()
+    }
+
+    private fun stopMediaPlayer() {
         if (MediaPlayer().isPlaying) {
             MediaPlayer().stop()
         }
@@ -185,8 +184,8 @@ class SettingsActivity : AppCompatActivity() {
             columns = seekBar.progress
             rows = (columns!! * bigSideOfImageView) / smallSideOfImageView
             complexity = columns!! * rows!!
-            str = getString(R.string.complexity_text) + " $complexity"
-            binding.textViewComplexity.text = str
+            textComplexity = getString(R.string.complexity_text) + " $complexity"
+            binding.textViewComplexity.text = textComplexity
             binding.puzzlePathView.num = columns!!
             binding.puzzlePathView.invalidate()
         }
@@ -208,36 +207,35 @@ class SettingsActivity : AppCompatActivity() {
 
 
     fun checkGameOver() {
-        if (isGameOver) {
-            val intent = Intent(this@SettingsActivity, MainActivity::class.java)
-            playSuccessSound()
+        if (isGameOver.not()) return
+        val intent = Intent(this@SettingsActivity, MainActivity::class.java)
+        playSuccessSound()
 
-            AlertDialog.Builder(this@SettingsActivity)
-                .setTitle(getString(R.string.you_won_title))
-                .setIcon(R.drawable.ic_celebration)
-                .setMessage(getString(R.string.you_won_message) + "\n" + getString(R.string.you_won_question))
-                .setPositiveButton(getString(R.string.yes)) { dialog, _ ->
-                    startActivity(intent)
-                    finish()
-                }
-                .setNegativeButton(getString(R.string.no)) { dialog, _ ->
-                    AlertDialog.Builder(this).apply {
-                        setTitle(getString(R.string.confirmation))
-                        setIcon(R.drawable.ic_warning_24)
-                        setMessage(getString(R.string.are_you_sure))
-                        setPositiveButton(getString(R.string.yes)) { _, _ ->
-                            super.onBackPressed()
-                        }
-                        setNegativeButton(getString(R.string.no)) { _, _ ->
-                            startActivity(intent)
-                            finish()
-                        }
-                        setCancelable(false)
-                    }.create().show()
-                }
-                .setCancelable(false)
-                .create().show()
-        }
+        AlertDialog.Builder(this@SettingsActivity)
+            .setTitle(getString(R.string.you_won_title))
+            .setIcon(R.drawable.ic_celebration)
+            .setMessage(getString(R.string.you_won_message) + "\n" + getString(R.string.you_won_question))
+            .setPositiveButton(getString(R.string.yes)) { dialog, _ ->
+                startActivity(intent)
+                finish()
+            }
+            .setNegativeButton(getString(R.string.no)) { dialog, _ ->
+                AlertDialog.Builder(this).apply {
+                    setTitle(getString(R.string.confirmation))
+                    setIcon(R.drawable.ic_warning_24)
+                    setMessage(getString(R.string.are_you_sure))
+                    setPositiveButton(getString(R.string.yes)) { _, _ ->
+                        super.onBackPressed()
+                    }
+                    setNegativeButton(getString(R.string.no)) { _, _ ->
+                        startActivity(intent)
+                        finish()
+                    }
+                    setCancelable(false)
+                }.create().show()
+            }
+            .setCancelable(false)
+            .create().show()
     }
 
     private fun playSuccessSound() {
@@ -484,19 +482,19 @@ class SettingsActivity : AppCompatActivity() {
     }
 
 
-    fun onButtonClick(view: View) {
+    fun onButtonContinueClick() {
         playSoundClick()
-        imageView?.bringToFront()
-        imageView?.alpha = 0.3f
-        containerLayout?.bringToFront()
-        puzzlePathView?.isGone = true
-        tvComplexity?.isVisible = false
-        seekBar?.isVisible = false
-        buttonContinue?.isVisible = false
-        backPuzzle?.isVisible = true
+        binding.settingsImageView.bringToFront()
+        binding.settingsImageView.alpha = 0.3f
+        binding.containerLayout.bringToFront()
+        binding.puzzlePathView.isGone = true
+        binding.textViewComplexity.isVisible = false
+        binding.seekBar.isVisible = false
+        binding.buttonContinue.isVisible = false
+        binding.battonBackPuzzle.isVisible = true
 
         //get list of puzzles
-        pieces = onImageSplit(imageView!!, columns!!)
+        pieces = onImageSplit(binding.settingsImageView, columns!!)
 
         val touchListener = TouchListener(this@SettingsActivity)
 
@@ -505,53 +503,55 @@ class SettingsActivity : AppCompatActivity() {
 
         for (piece in pieces!!) {
             piece.setOnTouchListener(touchListener)
-            containerLayout!!.addView(piece)
+            binding.containerLayout.addView(piece)
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
             if (isScreenOrientationPortrait()) {
                 //randomize position on the bottom of screen
                 lParams.leftMargin = Random.nextInt(
-                    containerLayout!!.width - piece.dataOfPiece.pieceWidth
+                    binding.containerLayout.width - piece.dataOfPiece.pieceWidth
                 )
-                lParams.topMargin = containerLayout!!.height - piece.dataOfPiece.pieceHeight
+                lParams.topMargin = binding.containerLayout.height - piece.dataOfPiece.pieceHeight
                 piece.layoutParams = lParams
             } else {
                 //randomize position on the right of screen
                 lParams.topMargin = Random.nextInt(
-                    containerLayout!!.height - piece.dataOfPiece.pieceHeight
+                    binding.containerLayout.height - piece.dataOfPiece.pieceHeight
                 )
-                lParams.leftMargin = containerLayout!!.width - piece.dataOfPiece.pieceWidth
+                lParams.leftMargin = binding.containerLayout.width - piece.dataOfPiece.pieceWidth
                 piece.layoutParams = lParams
             }
         }
     }
 
-    fun onBackPuzzleClick(view: View) {
+    fun onButtonBackPuzzleClick() {
         playSoundClick()
 
         for (piece in pieces!!) {
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
             if (piece.dataOfPiece.canMove) {
                 if (isScreenOrientationPortrait()
-                    && (lParams.topMargin != containerLayout!!.height - piece.dataOfPiece.pieceHeight)
+                    && (lParams.topMargin != binding.containerLayout.height - piece.dataOfPiece.pieceHeight)
                 ) {
                     //this is the place for the animation code
 
 
                     //randomize position on the bottom of screen
                     lParams.leftMargin =
-                        Random.nextInt(containerLayout!!.width - piece.dataOfPiece.pieceWidth)
-                    lParams.topMargin = containerLayout!!.height - piece.dataOfPiece.pieceHeight
+                        Random.nextInt(binding.containerLayout.width - piece.dataOfPiece.pieceWidth)
+                    lParams.topMargin =
+                        binding.containerLayout.height - piece.dataOfPiece.pieceHeight
                     piece.layoutParams = lParams
                 } else if (!isScreenOrientationPortrait()
-                    && lParams.leftMargin != containerLayout!!.width - piece.dataOfPiece.pieceWidth
+                    && lParams.leftMargin != binding.containerLayout.width - piece.dataOfPiece.pieceWidth
                 ) {
                     //this is the place for the animation code
 
 
                     //randomize position on the right of screen
                     lParams.topMargin =
-                        Random.nextInt(containerLayout!!.height - piece.dataOfPiece.pieceHeight)
-                    lParams.leftMargin = containerLayout!!.width - piece.dataOfPiece.pieceWidth
+                        Random.nextInt(binding.containerLayout.height - piece.dataOfPiece.pieceHeight)
+                    lParams.leftMargin =
+                        binding.containerLayout.width - piece.dataOfPiece.pieceWidth
                     piece.layoutParams = lParams
                 }
             }

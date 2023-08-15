@@ -69,7 +69,6 @@
         android:layout_marginTop="24dp"
         android:layout_marginEnd="0dp"
         android:background="@drawable/button"
-        android:onClick="onButtonClick"
         android:text="@string/continue_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -95,13 +94,12 @@
 
 
     <ImageButton
-        android:id="@+id/backPuzzle"
+        android:id="@+id/battonBackPuzzle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:clickable="true"
         android:contentDescription="@string/get_wrong_puzzles_back"
-        android:onClick="onBackPuzzleClick"
         android:padding="15dp"
         android:rotation="90"
         app:layout_constraintBottom_toBottomOf="parent"
