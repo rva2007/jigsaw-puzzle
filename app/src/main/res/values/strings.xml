@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name">Jigsaw puzzles</string>
     <string name="title">Jigsaw puzzles</string>
-    <string name="camera_button">camera_button</string>
-    <string name="gallery_button">gallery_button</string>
+    <string name="camera_button">camera button</string>
+    <string name="gallery_button">gallery button</string>
     <string name="continue_button">Continue</string>
     <string name="you_won_title">Good job!!!</string>
     <string name="you_won_message">The picture is assembled!</string>
@@ -11,11 +11,9 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="complexity_text">Number of puzzles</string>
-    <string name="imageview_on_settings_screen">ImageView on settings screen</string>
-    <string name="alpha_for_imageview_on_puzzle_screen">0.3</string>
+    <string name="image_on_settings_screen">image on settings screen</string>
     <string name="get_wrong_puzzles_back">get wrong puzzles back</string>
     <string name="picture">picture</string>
-    <string name="textview">text in TextView</string>
     <string name="confirmation">Confirmation</string>
     <string name="are_you_sure">Are you sure you want to quit?</string>
 </resources>
