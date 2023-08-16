@@ -13,15 +13,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
-import android.view.View
 import android.widget.AdapterView
-import android.widget.GridView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.jigsawpuzzles.databinding.ActivityMainBinding
@@ -34,6 +31,39 @@ class MainActivity : AppCompatActivity() {
     private var requestCode: Int? = null
     private var bitmap: Bitmap? = null
     private var matrix = Matrix()
+    private val galleryResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // There are no request codes
+                val intent = Intent(applicationContext, SettingsActivity::class.java)
+                val uri = result.data!!.data
+                bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+                intent.putExtra("orientation", getOrientationScreen(bitmap!!))
+                resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
+                intent.putExtra("gallery", bitmap)
+                startActivity(intent)
+                bitmap?.recycle()
+                finish()
+            }
+        }
+
+    private val cameraResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // There are no request codes
+                val intent = Intent(applicationContext, SettingsActivity::class.java)
+                bitmap = result.data?.extras?.get("data") as Bitmap
+                intent.putExtra("orientation", getOrientationScreen(bitmap!!))
+                resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
+                intent.putExtra("camera", bitmap)
+                startActivity(intent)
+                bitmap?.recycle()
+                finish()
+
+            }
+        }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -62,9 +92,8 @@ class MainActivity : AppCompatActivity() {
 
         try {
             val files = assetManager.list("img")
-            val gridView = binding.gridView
-            gridView?.adapter = GridViewAdapter(this@MainActivity)
-            gridView?.onItemClickListener = AdapterView
+            binding.gridView?.adapter = GridViewAdapter(this@MainActivity)
+            binding.gridView?.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->
                     playClickSound()
                     bitmap = getAssetsBitmap("img/" + (files!![i % files.size]).toString())
@@ -73,7 +102,7 @@ class MainActivity : AppCompatActivity() {
                     resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
                     intent.putExtra("assets", bitmap)
                     startActivity(intent)
-                    bitmap?.recycle()
+                    bitmap!!.recycle()
                     finish()
                 }
         } catch (e: IOException) {
@@ -216,32 +245,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        this.requestCode = requestCode
-        val intent = Intent(this@MainActivity, SettingsActivity::class.java)
-        if (requestCode == GALLERY_REQUEST && resultCode == RESULT_OK) {
-            val uri = data!!.data
-            bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
-            intent.putExtra("orientation", getOrientationScreen(bitmap!!))
-            resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
-            intent.putExtra("gallery", bitmap)
-            startActivity(intent)
-            bitmap?.recycle()
-            finish()
-        }
-        if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-            bitmap = data?.extras?.get("data") as Bitmap
-            intent.putExtra("orientation", getOrientationScreen(bitmap!!))
-            resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
-            intent.putExtra("camera", bitmap)
-            startActivity(intent)
-            bitmap?.recycle()
-            finish()
-        }
-    }
-
     fun onCameraImageClicked() {
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -256,9 +259,10 @@ class MainActivity : AppCompatActivity() {
         } else {
             playClickSound()
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            startActivityForResult(intent, CAMERA_REQUEST)
+            cameraResultLauncher.launch(intent)
         }
     }
+
 
     fun onGalleryImageClicked() {
         if (ContextCompat.checkSelfPermission(
@@ -275,9 +279,11 @@ class MainActivity : AppCompatActivity() {
             playClickSound()
             val intent = Intent(Intent.ACTION_GET_CONTENT)
             intent.type = "image/*"
-            startActivityForResult(intent, GALLERY_REQUEST)
+            galleryResultLauncher.launch(intent)
         }
     }
+
+
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
@@ -297,8 +303,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val CAMERA_REQUEST = 1
         const val REQUEST_PERMISSION_READ_EXTERNAL_STORAGE = 2
-        const val GALLERY_REQUEST = 3
-        const val REQUEST_CODE = 4
+        const val REQUEST_CODE = 3
     }
 
 }
