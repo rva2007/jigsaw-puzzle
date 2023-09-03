@@ -25,10 +25,10 @@ class PuzzlePathView @JvmOverloads constructor(
     }
     private var path: Path = Path()
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         path = preparePath(num)
-        canvas?.drawPath(path, paint)
+        canvas.drawPath(path, paint)
     }
 
     private fun preparePath(num: Int): Path {

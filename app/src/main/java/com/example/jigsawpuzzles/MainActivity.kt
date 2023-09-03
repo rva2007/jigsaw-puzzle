@@ -8,7 +8,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.MediaPlayer
-import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -20,48 +19,47 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withStarted
 import com.example.jigsawpuzzles.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
-    private var requestCode: Int? = null
     private var bitmap: Bitmap? = null
     private var matrix = Matrix()
-    private val galleryResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                // There are no request codes
-                val intent = Intent(applicationContext, SettingsActivity::class.java)
-                val uri = result.data!!.data
-                bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
-                intent.putExtra("orientation", getOrientationScreen(bitmap!!))
-                resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
-                intent.putExtra("gallery", bitmap)
-                startActivity(intent)
-                bitmap?.recycle()
-                finish()
+
+    private val takeImageResult =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
+            if (isSuccess) {
+                latestTmpUri?.let { uri ->
+                    val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+                    intent.putExtra("camera", uri.toString())
+
+                    startActivity(intent)
+                }
             }
         }
 
-    private val cameraResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                // There are no request codes
-                val intent = Intent(applicationContext, SettingsActivity::class.java)
-                bitmap = result.data?.extras?.get("data") as Bitmap
+    private val selectImageFromGalleryResult =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                val path = it.path
+                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), it)
+                val intent = Intent(this@MainActivity, SettingsActivity::class.java)
                 intent.putExtra("orientation", getOrientationScreen(bitmap!!))
-                resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
-                intent.putExtra("camera", bitmap)
+                intent.putExtra("gallery", uri.toString())
                 startActivity(intent)
-                bitmap?.recycle()
-                finish()
-
             }
         }
+
+    private var latestTmpUri: Uri? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,14 +68,43 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.buttonCamera.setOnClickListener {
-            onCameraImageClicked()
-        }
-        binding.buttonGallery.setOnClickListener {
-            onGalleryImageClicked()
-        }
+        setClickListeners()
 
         getImagesFromAssets()
+    }
+
+    private fun setClickListeners() {
+        binding.buttonCamera.setOnClickListener { takeImage() }
+        binding.buttonGallery.setOnClickListener { selectImageFromGallery() }
+    }
+
+    private fun selectImageFromGallery() = selectImageFromGalleryResult.launch("image/*")
+
+
+    private fun takeImage() {
+        lifecycleScope.launch {
+            // Suspend until you are STARTED
+            withStarted { }
+            // Run your code that happens after you become STARTED here
+            getTmpFileUri().let { uri ->
+                latestTmpUri = uri
+                takeImageResult.launch(uri)
+            }
+            // Note: your code will continue to run even if the Lifecycle falls below STARTED
+        }
+
+    }
+
+    private fun getTmpFileUri(): Uri {
+        val tmpFile = File.createTempFile("tmp_image_file", ".png", cacheDir).apply {
+            createNewFile()
+            deleteOnExit()
+        }
+        return FileProvider.getUriForFile(
+            applicationContext,
+            "${BuildConfig.APPLICATION_ID}.provider",
+            tmpFile
+        )
     }
 
     override fun onDestroy() {
@@ -92,15 +119,16 @@ class MainActivity : AppCompatActivity() {
 
         try {
             val files = assetManager.list("img")
-            binding.gridView?.adapter = GridViewAdapter(this@MainActivity)
-            binding.gridView?.onItemClickListener = AdapterView
+            binding.gridView.adapter = GridViewAdapter(this@MainActivity)
+            binding.gridView.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->
                     playClickSound()
-                    bitmap = getAssetsBitmap("img/" + (files!![i % files.size]).toString())
+                    val path = "img/" + (files!![i % files.size]).toString()
+                    val uri = Uri.parse(path)
+                    bitmap = getAssetsBitmap(path)
                     val intent = Intent(applicationContext, SettingsActivity::class.java)
                     intent.putExtra("orientation", getOrientationScreen(bitmap!!))
-                    resizeBitmapAndRotateIfBitmapLandscape(bitmap!!)
-                    intent.putExtra("assets", bitmap)
+                    intent.putExtra("assets", uri.toString())
                     startActivity(intent)
                     bitmap!!.recycle()
                     finish()
@@ -139,22 +167,22 @@ class MainActivity : AppCompatActivity() {
         return bitmap
     }
 
-    private fun resizeBitmapAndRotateIfBitmapLandscape(bmp: Bitmap): Bitmap {
-        this.bitmap = bmp
-        if (bitmap!!.width > bitmap!!.height) {
-            matrix.postRotate(90f)
-            bitmap =
-                Bitmap.createBitmap(
-                    bitmap!!, 0, 0,
-                    bitmap!!.width, bitmap!!.height,
-                    matrix, true
-                )
-            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 300, 400)
-        } else {
-            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 300, 400)
-        }
-        return bitmap!!
-    }
+//    private fun resizeBitmapAndRotateIfBitmapLandscape(bmp: Bitmap): Bitmap {
+//        this.bitmap = bmp
+//        if (bitmap!!.width > bitmap!!.height) {
+//            matrix.postRotate(90f)
+//            bitmap =
+//                Bitmap.createBitmap(
+//                    bitmap!!, 0, 0,
+//                    bitmap!!.width, bitmap!!.height,
+//                    matrix, true
+//                )
+//            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 300, 400)
+//        } else {
+//            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 300, 400)
+//        }
+//        return bitmap!!
+//    }
 
     private fun askForPermissions(): Boolean {
         if (!isPermissionsAllowed()) {
@@ -202,11 +230,8 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             REQUEST_CODE -> {
-                if (!(grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // permission is denied, you can ask for permission again, if you want
-                    askForPermissions()
-                }
-                return
+                if ((grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) return
+                else askForPermissions()
             }
         }
     }
@@ -244,55 +269,13 @@ class MainActivity : AppCompatActivity() {
                 ) != PackageManager.PERMISSION_GRANTED)
     }
 
-
-    fun onCameraImageClicked() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this as Activity,
-                arrayOf(Manifest.permission.CAMERA),
-                CAMERA_REQUEST
-            )
-        } else {
-            playClickSound()
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            cameraResultLauncher.launch(intent)
-        }
-    }
-
-
-    fun onGalleryImageClicked() {
-        if (ContextCompat.checkSelfPermission(
-                this@MainActivity,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this@MainActivity, arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ), REQUEST_PERMISSION_READ_EXTERNAL_STORAGE
-            )
-        } else {
-            playClickSound()
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "image/*"
-            galleryResultLauncher.launch(intent)
-        }
-    }
-
-
-
-    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         AlertDialog.Builder(this).apply {
             setTitle(getString(R.string.confirmation))
             setIcon(R.drawable.ic_warning_24)
             setMessage(getString(R.string.are_you_sure))
             setPositiveButton(getString(R.string.yes)) { _, _ ->
-                super.onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
             }
             setNegativeButton(getString(R.string.no)) { _, _ ->
             }
@@ -301,8 +284,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val CAMERA_REQUEST = 1
-        const val REQUEST_PERMISSION_READ_EXTERNAL_STORAGE = 2
         const val REQUEST_CODE = 3
     }
 

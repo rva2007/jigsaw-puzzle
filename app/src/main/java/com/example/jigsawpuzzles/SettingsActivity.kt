@@ -6,12 +6,10 @@ import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.media.MediaPlayer
-import android.media.ThumbnailUtils
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.view.WindowInsets
-import android.view.WindowManager
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -19,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.example.jigsawpuzzles.databinding.ActivitySettingsBinding
+import com.squareup.picasso.Picasso
+import java.io.File
 import kotlin.random.Random
 
 
@@ -29,6 +29,8 @@ class SettingsActivity : AppCompatActivity() {
     private var bitmapFromGallery: Bitmap? = null
     private var bitmapFromCamera: Bitmap? = null
     private var bitmap: Bitmap? = null
+    private var bitmapWidth: Int? = null
+    private var bitmapHeght: Int? = null
     private var imageViewWidth: Int? = null
     private var imageViewHeight: Int? = null
     private var targetWidth: Int? = null
@@ -44,6 +46,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val intent = intent
+
         val orientation = intent.getStringExtra("orientation")
         if (orientation.equals("landscape")) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -102,32 +105,70 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.puzzlePathView.layoutParams = params
 
-        bitmapFromAssets = intent.getParcelableExtra("assets")
-        bitmapFromGallery = intent.getParcelableExtra("gallery")
-        bitmapFromCamera = intent.getParcelableExtra("camera")
-
-        if (bitmapFromAssets != null) {
-            bitmap = bitmapFromAssets
-        }
-        if (bitmapFromGallery != null) {
-            bitmap = bitmapFromGallery
-        }
-        if (bitmapFromCamera != null) {
-            bitmap = bitmapFromCamera
-        }
-
         binding.settingsImageView.post {
-            if (!isScreenOrientationPortrait()) {
-                val matrix = Matrix()
-                matrix.postRotate(-90f)
-                bitmap = Bitmap.createBitmap(
-                    bitmap!!, 0, 0, bitmap!!.width, bitmap!!.height, matrix, true
-                )
+            val stringGallery = intent.getStringExtra("gallery")
+            if (stringGallery != null) {
+                val uriFromGallery = Uri.parse(stringGallery)
+                if (isScreenOrientationPortrait()) {
+                    Picasso.get()
+                        .load(uriFromGallery)
+                        .fit()
+                        .into(binding.settingsImageView)
+                } else {
+                    Picasso.get()
+                        .load(uriFromGallery)
+                        .rotate(90f)
+                        .fit()
+                        .into(binding.settingsImageView)
+                }
+
             }
-            bitmap = ThumbnailUtils.extractThumbnail(bitmap, imageViewWidth!!, imageViewHeight!!)
-            binding.settingsImageView.setImageBitmap(bitmap)
+
+            val stringCamera = intent.getStringExtra("camera")
+            if (stringCamera != null) {
+                val uriFromCamera = Uri.parse(stringCamera)
+                Picasso.get()
+                    .load(uriFromCamera)
+                    .fit()
+                    .into(binding.settingsImageView)
+            }
+
+            val stringAssets = intent.getStringExtra("assets")
+            if (stringAssets != null) {
+                val imageUri = Uri.fromFile(File("//android_asset/" + stringAssets))
+                Picasso.get()
+                    .load(imageUri)
+                    .fit()
+                    .into(binding.settingsImageView)
+            }
         }
     }
+
+//    private fun getAssetsBitmap(str: String): Bitmap? {
+//        var inputStream: InputStream? = null
+//        try {
+//            inputStream = applicationContext.assets.open(str)
+//        } catch (e: FileNotFoundException) {
+//            e.printStackTrace()
+//            Toast.makeText(this@SettingsActivity, e.localizedMessage, Toast.LENGTH_SHORT).show()
+//        }
+//        val options = BitmapFactory.Options()
+//        options.inJustDecodeBounds = true
+//        bitmap = BitmapFactory.decodeStream(
+//            inputStream,
+//            null,
+//            options
+//        )
+//
+//        bitmapWidth = options.outWidth
+//        bitmapHeght = options.outHeight
+//
+//
+//
+//
+//        return bitmap
+//    }
+
 
     private fun hideActionBar() {
         supportActionBar?.hide()
@@ -151,28 +192,28 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun WindowManager.currentWindowMetricsPointCompat(): Point {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val windowInsets = currentWindowMetrics.windowInsets
-            var insets: Insets = windowInsets.getInsets(WindowInsets.Type.navigationBars())
-            windowInsets.displayCutout?.run {
-                insets = Insets.max(
-                    insets,
-                    Insets.of(safeInsetLeft, safeInsetTop, safeInsetRight, safeInsetBottom)
-                )
-            }
-            val insetsWidth = insets.right + insets.left
-            val insetsHeight = insets.top + insets.bottom
-            Point(
-                currentWindowMetrics.bounds.width() - insetsWidth,
-                currentWindowMetrics.bounds.height() - insetsHeight
-            )
-        } else {
-            Point().apply {
-                defaultDisplay.getSize(this)
-            }
-        }
-    }
+//    private fun WindowManager.currentWindowMetricsPointCompat(): Point {
+//        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//            val windowInsets = currentWindowMetrics.windowInsets
+//            var insets: Insets = windowInsets.getInsets(WindowInsets.Type.navigationBars())
+//            windowInsets.displayCutout?.run {
+//                insets = Insets.max(
+//                    insets,
+//                    Insets.of(safeInsetLeft, safeInsetTop, safeInsetRight, safeInsetBottom)
+//                )
+//            }
+//            val insetsWidth = insets.right + insets.left
+//            val insetsHeight = insets.top + insets.bottom
+//            Point(
+//                currentWindowMetrics.bounds.width() - insetsWidth,
+//                currentWindowMetrics.bounds.height() - insetsHeight
+//            )
+//        } else {
+//            Point().apply {
+//                defaultDisplay.getSize(this)
+//            }
+//        }
+//    }
 
     private var onSeekBarChangeListener: SeekBar.OnSeekBarChangeListener = object :
         SeekBar.OnSeekBarChangeListener {
@@ -225,7 +266,7 @@ class SettingsActivity : AppCompatActivity() {
                     setIcon(R.drawable.ic_warning_24)
                     setMessage(getString(R.string.are_you_sure))
                     setPositiveButton(getString(R.string.yes)) { _, _ ->
-                        super.onBackPressed()
+                        onBackPressedDispatcher.onBackPressed()
                     }
                     setNegativeButton(getString(R.string.no)) { _, _ ->
                         startActivity(intent)
@@ -482,7 +523,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
 
-    fun onButtonContinueClick() {
+    private fun onButtonContinueClick() {
         playSoundClick()
         binding.settingsImageView.bringToFront()
         binding.settingsImageView.alpha = 0.3f
@@ -523,7 +564,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    fun onButtonBackPuzzleClick() {
+    private fun onButtonBackPuzzleClick() {
         playSoundClick()
 
         for (piece in pieces!!) {
@@ -564,14 +605,13 @@ class SettingsActivity : AppCompatActivity() {
         clickSound.start()
     }
 
-    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         AlertDialog.Builder(this).apply {
             setTitle(getString(R.string.confirmation))
             setIcon(R.drawable.ic_warning_24)
             setMessage(getString(R.string.are_you_sure))
             setPositiveButton(getString(R.string.yes)) { _, _ ->
-                super.onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
             }
             setNegativeButton(getString(R.string.no)) { _, _ ->
             }
