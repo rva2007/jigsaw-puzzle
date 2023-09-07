@@ -6,15 +6,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
+import android.graphics.ImageDecoder
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.provider.Settings
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -33,35 +34,49 @@ import java.io.InputStream
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     private var bitmap: Bitmap? = null
-    private var matrix = Matrix()
 
+    @RequiresApi(Build.VERSION_CODES.P)
     private val takeImageResult =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
             if (isSuccess) {
                 latestTmpUri?.let { uri ->
+                    val source = ImageDecoder.createSource(this.contentResolver, uri)
+                    bitmap = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                        decoder.setTargetSampleSize(1) // shrinking by
+                        decoder.isMutableRequired = true // this resolve the hardware type of bitmap problem
+                    }
                     val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+                    intent.putExtra("orientation", getOrientationScreen(bitmap!!))
                     intent.putExtra("camera", uri.toString())
-
                     startActivity(intent)
+                    bitmap!!.recycle()
+                    finish()
                 }
             }
         }
 
+    @RequiresApi(Build.VERSION_CODES.P)
     private val selectImageFromGalleryResult =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
-                val path = it.path
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), it)
+                val source = ImageDecoder.createSource(this.contentResolver, it)
+                bitmap = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                    decoder.setTargetSampleSize(1) // shrinking by
+                    decoder.isMutableRequired = true // this resolve the hardware type of bitmap problem
+                }
                 val intent = Intent(this@MainActivity, SettingsActivity::class.java)
                 intent.putExtra("orientation", getOrientationScreen(bitmap!!))
                 intent.putExtra("gallery", uri.toString())
                 startActivity(intent)
+                bitmap!!.recycle()
+                finish()
             }
         }
 
     private var latestTmpUri: Uri? = null
 
 
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -73,14 +88,17 @@ class MainActivity : AppCompatActivity() {
         getImagesFromAssets()
     }
 
+    @RequiresApi(Build.VERSION_CODES.P)
     private fun setClickListeners() {
         binding.buttonCamera.setOnClickListener { takeImage() }
         binding.buttonGallery.setOnClickListener { selectImageFromGallery() }
     }
 
+    @RequiresApi(Build.VERSION_CODES.P)
     private fun selectImageFromGallery() = selectImageFromGalleryResult.launch("image/*")
 
 
+    @RequiresApi(Build.VERSION_CODES.P)
     private fun takeImage() {
         lifecycleScope.launch {
             // Suspend until you are STARTED

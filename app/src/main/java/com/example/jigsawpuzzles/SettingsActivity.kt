@@ -22,6 +22,7 @@ import java.io.File
 import kotlin.random.Random
 
 
+
 class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
     private var pieces: ArrayList<PuzzlePiece>? = null
@@ -157,6 +158,7 @@ class SettingsActivity : AppCompatActivity() {
             MediaPlayer().stop()
         }
     }
+
 
     private fun isScreenOrientationPortrait(): Boolean {
         return when (resources.configuration.orientation) {
