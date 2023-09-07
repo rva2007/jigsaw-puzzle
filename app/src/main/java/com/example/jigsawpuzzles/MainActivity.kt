@@ -146,7 +146,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun getOrientationScreen(bitmap: Bitmap): String {
         val orientation: String
-        if (bitmap.width > bitmap.height) {
+        val bWidth = bitmap.width
+        val bHeight = bitmap.height
+        if (bWidth > bHeight) {
             orientation = "landscape"
         } else {
             orientation = "portrait"
@@ -166,23 +168,6 @@ class MainActivity : AppCompatActivity() {
         }
         return bitmap
     }
-
-//    private fun resizeBitmapAndRotateIfBitmapLandscape(bmp: Bitmap): Bitmap {
-//        this.bitmap = bmp
-//        if (bitmap!!.width > bitmap!!.height) {
-//            matrix.postRotate(90f)
-//            bitmap =
-//                Bitmap.createBitmap(
-//                    bitmap!!, 0, 0,
-//                    bitmap!!.width, bitmap!!.height,
-//                    matrix, true
-//                )
-//            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 300, 400)
-//        } else {
-//            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 300, 400)
-//        }
-//        return bitmap!!
-//    }
 
     private fun askForPermissions(): Boolean {
         if (!isPermissionsAllowed()) {

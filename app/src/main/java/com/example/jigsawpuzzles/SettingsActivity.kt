@@ -25,12 +25,6 @@ import kotlin.random.Random
 class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
     private var pieces: ArrayList<PuzzlePiece>? = null
-    private var bitmapFromAssets: Bitmap? = null
-    private var bitmapFromGallery: Bitmap? = null
-    private var bitmapFromCamera: Bitmap? = null
-    private var bitmap: Bitmap? = null
-    private var bitmapWidth: Int? = null
-    private var bitmapHeght: Int? = null
     private var imageViewWidth: Int? = null
     private var imageViewHeight: Int? = null
     private var targetWidth: Int? = null
@@ -48,11 +42,7 @@ class SettingsActivity : AppCompatActivity() {
         val intent = intent
 
         val orientation = intent.getStringExtra("orientation")
-        if (orientation.equals("landscape")) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        } else if (orientation.equals("portrait")) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
+        getScreenOrientation(orientation!!)
 
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -117,7 +107,7 @@ class SettingsActivity : AppCompatActivity() {
                 } else {
                     Picasso.get()
                         .load(uriFromGallery)
-                        .rotate(90f)
+//                        .rotate(90f)
                         .fit()
                         .into(binding.settingsImageView)
                 }
@@ -144,30 +134,13 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-//    private fun getAssetsBitmap(str: String): Bitmap? {
-//        var inputStream: InputStream? = null
-//        try {
-//            inputStream = applicationContext.assets.open(str)
-//        } catch (e: FileNotFoundException) {
-//            e.printStackTrace()
-//            Toast.makeText(this@SettingsActivity, e.localizedMessage, Toast.LENGTH_SHORT).show()
-//        }
-//        val options = BitmapFactory.Options()
-//        options.inJustDecodeBounds = true
-//        bitmap = BitmapFactory.decodeStream(
-//            inputStream,
-//            null,
-//            options
-//        )
-//
-//        bitmapWidth = options.outWidth
-//        bitmapHeght = options.outHeight
-//
-//
-//
-//
-//        return bitmap
-//    }
+    private fun getScreenOrientation(orientation: String) {
+        if (orientation.equals("landscape")) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        } else if (orientation.equals("portrait")) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+    }
 
 
     private fun hideActionBar() {
@@ -191,29 +164,6 @@ class SettingsActivity : AppCompatActivity() {
             else -> false
         }
     }
-
-//    private fun WindowManager.currentWindowMetricsPointCompat(): Point {
-//        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//            val windowInsets = currentWindowMetrics.windowInsets
-//            var insets: Insets = windowInsets.getInsets(WindowInsets.Type.navigationBars())
-//            windowInsets.displayCutout?.run {
-//                insets = Insets.max(
-//                    insets,
-//                    Insets.of(safeInsetLeft, safeInsetTop, safeInsetRight, safeInsetBottom)
-//                )
-//            }
-//            val insetsWidth = insets.right + insets.left
-//            val insetsHeight = insets.top + insets.bottom
-//            Point(
-//                currentWindowMetrics.bounds.width() - insetsWidth,
-//                currentWindowMetrics.bounds.height() - insetsHeight
-//            )
-//        } else {
-//            Point().apply {
-//                defaultDisplay.getSize(this)
-//            }
-//        }
-//    }
 
     private var onSeekBarChangeListener: SeekBar.OnSeekBarChangeListener = object :
         SeekBar.OnSeekBarChangeListener {
