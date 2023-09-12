@@ -188,7 +188,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun askForPermissions(): Boolean {
-        if (!isPermissionsAllowed()) {
+        if (isPermissionsAllowed().not()) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     this as Activity,
                     Manifest.permission.READ_EXTERNAL_STORAGE
@@ -269,7 +269,7 @@ class MainActivity : AppCompatActivity() {
                 ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED)
+                ) != PackageManager.PERMISSION_GRANTED).not()
     }
 
     override fun onBackPressed() {
