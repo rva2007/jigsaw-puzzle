@@ -58,10 +58,10 @@ class ImageSplitter(context: Context) {
                 )
                 val piece = PuzzlePiece(_context)
                 piece.setImageBitmap(pieceBitmap)
-                piece.dataOfPiece.xCoord = xCoord - offsetX + imageView.left
-                piece.dataOfPiece.yCoord = yCoord - offsetY + imageView.top
-                piece.dataOfPiece.pieceWidth = pieceWidth + offsetX
-                piece.dataOfPiece.pieceHeight = pieceHeight + offsetY
+                piece.xCoord = xCoord - offsetX + imageView.left
+                piece.yCoord = yCoord - offsetY + imageView.top
+                piece.pieceWidth = pieceWidth + offsetX
+                piece.pieceHeight = pieceHeight + offsetY
                 //this bitmap will hold our final puzzle piece image
                 val puzzlePiece = Bitmap.createBitmap(
                     pieceWidth + offsetX, pieceHeight + offsetY, Bitmap.Config.ARGB_8888
@@ -153,6 +153,28 @@ class ImageSplitter(context: Context) {
         canvas.drawBitmap(pieceBitmap, 0f, 0f, paint)
     }
 
+    private fun drawTopBump(
+        path: Path,
+        offsetX: Int,
+        pieceBitmap: Bitmap,
+        offsetY: Int,
+        bumpSize: Int
+    ) {
+        path.lineTo(
+            (offsetX + (pieceBitmap.width - offsetX) / 3).toFloat(),
+            offsetY.toFloat()
+        )
+        path.cubicTo(
+            ((offsetX + (pieceBitmap.width - offsetX) / 6).toFloat()),
+            (offsetY - bumpSize).toFloat(),
+            ((offsetX + (pieceBitmap.width - offsetX) / 6 * 5)).toFloat(),
+            (offsetY - bumpSize).toFloat(),
+            (offsetX + (pieceBitmap.width - offsetX) / 3 * 2).toFloat(),
+            offsetY.toFloat()
+        )
+        path.lineTo(pieceBitmap.width.toFloat(), offsetY.toFloat())
+    }
+
     private fun drawBottomBump(
         path: Path,
         offsetX: Int,
@@ -223,6 +245,17 @@ class ImageSplitter(context: Context) {
         )
     }
 
+    private fun drawTopPieceSide(
+        path: Path,
+        pieceBitmap: Bitmap,
+        offsetY: Int
+    ) {
+        path.lineTo(
+            pieceBitmap.width.toFloat(),
+            offsetY.toFloat()
+        )
+    }
+
     private fun drawRightPieceSide(path: Path, pieceBitmap: Bitmap) {
         path.lineTo(
             pieceBitmap.width.toFloat(),
@@ -240,38 +273,7 @@ class ImageSplitter(context: Context) {
         )
     }
 
-    private fun drawTopBump(
-        path: Path,
-        offsetX: Int,
-        pieceBitmap: Bitmap,
-        offsetY: Int,
-        bumpSize: Int
-    ) {
-        path.lineTo(
-            (offsetX + (pieceBitmap.width - offsetX) / 3).toFloat(),
-            offsetY.toFloat()
-        )
-        path.cubicTo(
-            ((offsetX + (pieceBitmap.width - offsetX) / 6).toFloat()),
-            (offsetY - bumpSize).toFloat(),
-            ((offsetX + (pieceBitmap.width - offsetX) / 6 * 5)).toFloat(),
-            (offsetY - bumpSize).toFloat(),
-            (offsetX + (pieceBitmap.width - offsetX) / 3 * 2).toFloat(),
-            offsetY.toFloat()
-        )
-        path.lineTo(pieceBitmap.width.toFloat(), offsetY.toFloat())
-    }
 
-    private fun drawTopPieceSide(
-        path: Path,
-        pieceBitmap: Bitmap,
-        offsetY: Int
-    ) {
-        path.lineTo(
-            pieceBitmap.width.toFloat(),
-            offsetY.toFloat()
-        )
-    }
 
 
 }

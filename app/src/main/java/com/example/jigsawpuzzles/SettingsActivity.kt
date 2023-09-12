@@ -189,7 +189,7 @@ class SettingsActivity : AppCompatActivity() {
     private val isGameOver: Boolean
         get() {
             for (piece in pieces!!) {
-                if (piece.dataOfPiece.canMove) {
+                if (piece.canMove) {
                     return false
                 }
             }
@@ -267,16 +267,16 @@ class SettingsActivity : AppCompatActivity() {
             if (isScreenOrientationPortrait()) {
                 //randomize position on the bottom of screen
                 lParams.leftMargin = Random.nextInt(
-                    binding.containerLayout.width - piece.dataOfPiece.pieceWidth
+                    binding.containerLayout.width - piece.pieceWidth
                 )
-                lParams.topMargin = binding.containerLayout.height - piece.dataOfPiece.pieceHeight
+                lParams.topMargin = binding.containerLayout.height - piece.pieceHeight
                 piece.layoutParams = lParams
             } else {
                 //randomize position on the right of screen
                 lParams.topMargin = Random.nextInt(
-                    binding.containerLayout.height - piece.dataOfPiece.pieceHeight
+                    binding.containerLayout.height - piece.pieceHeight
                 )
-                lParams.leftMargin = binding.containerLayout.width - piece.dataOfPiece.pieceWidth
+                lParams.leftMargin = binding.containerLayout.width - piece.pieceWidth
                 piece.layoutParams = lParams
             }
         }
@@ -287,30 +287,30 @@ class SettingsActivity : AppCompatActivity() {
 
         for (piece in pieces!!) {
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
-            if (piece.dataOfPiece.canMove) {
+            if (piece.canMove) {
                 if (isScreenOrientationPortrait()
-                    && (lParams.topMargin != binding.containerLayout.height - piece.dataOfPiece.pieceHeight)
+                    && (lParams.topMargin != binding.containerLayout.height - piece.pieceHeight)
                 ) {
                     //this is the place for the animation code
 
 
                     //randomize position on the bottom of screen
                     lParams.leftMargin =
-                        Random.nextInt(binding.containerLayout.width - piece.dataOfPiece.pieceWidth)
+                        Random.nextInt(binding.containerLayout.width - piece.pieceWidth)
                     lParams.topMargin =
-                        binding.containerLayout.height - piece.dataOfPiece.pieceHeight
+                        binding.containerLayout.height - piece.pieceHeight
                     piece.layoutParams = lParams
                 } else if (isScreenOrientationPortrait().not()
-                    && lParams.leftMargin != binding.containerLayout.width - piece.dataOfPiece.pieceWidth
+                    && lParams.leftMargin != binding.containerLayout.width - piece.pieceWidth
                 ) {
                     //this is the place for the animation code
 
 
                     //randomize position on the right of screen
                     lParams.topMargin =
-                        Random.nextInt(binding.containerLayout.height - piece.dataOfPiece.pieceHeight)
+                        Random.nextInt(binding.containerLayout.height - piece.pieceHeight)
                     lParams.leftMargin =
-                        binding.containerLayout.width - piece.dataOfPiece.pieceWidth
+                        binding.containerLayout.width - piece.pieceWidth
                     piece.layoutParams = lParams
                 }
             }
