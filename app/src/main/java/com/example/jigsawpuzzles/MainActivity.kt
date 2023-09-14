@@ -43,9 +43,10 @@ class MainActivity : AppCompatActivity() {
                     val source = ImageDecoder.createSource(this.contentResolver, uri)
                     bitmap = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
                         decoder.setTargetSampleSize(1) // shrinking by
-                        decoder.isMutableRequired = true // this resolve the hardware type of bitmap problem
+                        decoder.isMutableRequired =
+                            true // this resolve the hardware type of bitmap problem
                     }
-                    val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+                    val intent = Intent(this, SettingsActivity::class.java)
                     intent.putExtra("orientation", getOrientationScreen(bitmap!!))
                     intent.putExtra("camera", uri.toString())
                     startActivity(intent)
@@ -62,9 +63,10 @@ class MainActivity : AppCompatActivity() {
                 val source = ImageDecoder.createSource(this.contentResolver, it)
                 bitmap = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
                     decoder.setTargetSampleSize(1) // shrinking by
-                    decoder.isMutableRequired = true // this resolve the hardware type of bitmap problem
+                    decoder.isMutableRequired =
+                        true // this resolve the hardware type of bitmap problem
                 }
-                val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+                val intent = Intent(this, SettingsActivity::class.java)
                 intent.putExtra("orientation", getOrientationScreen(bitmap!!))
                 intent.putExtra("gallery", uri.toString())
                 startActivity(intent)
@@ -127,9 +129,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (MediaPlayer().isPlaying) {
-            MediaPlayer().stop()
-        }
+        stopMediaPlayer()
+    }
+
+    private fun stopMediaPlayer() {
+        if (MediaPlayer().isPlaying) MediaPlayer().stop()
     }
 
     private fun getImagesFromAssets() {
@@ -137,8 +141,8 @@ class MainActivity : AppCompatActivity() {
 
         try {
             val files = assetManager.list("img")
-            binding.gridView.adapter = GridViewAdapter(this@MainActivity)
-            binding.gridView.onItemClickListener = AdapterView
+            binding.gridView?.adapter = GridViewAdapter(this@MainActivity)
+            binding.gridView?.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->
                     playClickSound()
                     val path = "img/" + (files!![i % files.size]).toString()
@@ -153,25 +157,14 @@ class MainActivity : AppCompatActivity() {
                 }
         } catch (e: IOException) {
             e.printStackTrace()
-            Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, e.localizedMessage, Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun playClickSound() {
-        val clickSound = MediaPlayer.create(this@MainActivity, R.raw.click_sound)
-        clickSound.start()
-    }
+    private fun playClickSound() = MediaPlayer.create(this, R.raw.click_sound).start()
 
     private fun getOrientationScreen(bitmap: Bitmap): String {
-        val orientation: String
-        val bWidth = bitmap.width
-        val bHeight = bitmap.height
-        if (bWidth > bHeight) {
-            orientation = "landscape"
-        } else {
-            orientation = "portrait"
-        }
-        return orientation
+        return if (bitmap.width > bitmap.height) "landscape" else "portrait"
     }
 
     private fun getAssetsBitmap(str: String): Bitmap? {
@@ -182,7 +175,7 @@ class MainActivity : AppCompatActivity() {
             bitmap = BitmapFactory.decodeStream(inputStream)
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
-            Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, e.localizedMessage, Toast.LENGTH_SHORT).show()
         }
         return bitmap
     }
@@ -273,17 +266,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        AlertDialog.Builder(this).apply {
-            setTitle(getString(R.string.confirmation))
-            setIcon(R.drawable.ic_warning_24)
-            setMessage(getString(R.string.are_you_sure))
-            setPositiveButton(getString(R.string.yes)) { _, _ ->
-                onBackPressedDispatcher.onBackPressed()
-            }
-            setNegativeButton(getString(R.string.no)) { _, _ ->
-            }
-            setCancelable(false)
-        }.create().show()
+        AlertDialogDemonstrator(this).showConfirmationAlertDialog()
     }
 
     companion object {

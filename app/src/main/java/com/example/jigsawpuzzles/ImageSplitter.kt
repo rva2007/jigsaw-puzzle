@@ -6,7 +6,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.widget.ImageView
 
 class ImageSplitter(context: Context) {
-    private val settingsActivity = SettingsActivity()
     private val _context = context
 
     fun onImageSplit(

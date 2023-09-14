@@ -8,6 +8,8 @@ import android.graphics.Path
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
 import com.example.jigsawpuzzles.R
+import com.example.jigsawpuzzles.ResourcesUtils
+import kotlin.properties.Delegates
 
 class PuzzlePathView @JvmOverloads constructor(
     context: Context,

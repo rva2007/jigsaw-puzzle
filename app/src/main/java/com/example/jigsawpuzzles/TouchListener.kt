@@ -52,7 +52,7 @@ class TouchListener(private val activity: SettingsActivity) : View.OnTouchListen
                 piece.y = piece.y.toInt()
 
                 if (xDiff <= tolerance && yDiff <= tolerance) {
-                    playSoundFit()
+                    playFitSound()
                     lParams.leftMargin = piece.xCoord
                     lParams.topMargin = piece.yCoord
                     piece.layoutParams = lParams
@@ -65,10 +65,7 @@ class TouchListener(private val activity: SettingsActivity) : View.OnTouchListen
         return true
     }
 
-    private fun playSoundFit() {
-        val fitSound = MediaPlayer.create(this.activity, R.raw.fit_sound)
-        fitSound.start()
-    }
+    private fun playFitSound() = MediaPlayer.create(this.activity, R.raw.fit_sound).start()
 
     private fun sendViewToBack(child: View) {
         val parent = child.parent as ViewGroup
