@@ -8,8 +8,6 @@ import android.graphics.Path
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
 import com.example.jigsawpuzzles.R
-import com.example.jigsawpuzzles.ResourcesUtils
-import kotlin.properties.Delegates
 
 class PuzzlePathView @JvmOverloads constructor(
     context: Context,
@@ -29,16 +27,20 @@ class PuzzlePathView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        path = preparePath(num)
+        path = preparePathOfView(num)
         canvas.drawPath(path, paint)
     }
 
-    private fun preparePath(num: Int): Path {
+    private fun preparePathOfView(num: Int): Path {
+        val (columns: Int, rows: Int) = calculateNumberColumnsAndRows(num)
+        return getPathOfView(columns, rows)
+    }
+
+    private fun calculateNumberColumnsAndRows(num: Int): Pair<Int, Int> {
         val columns: Int?
         val rows: Int?
         val bigSideOfPuzzlePathView = 4
         val smallSideOfPuzzlePathView = 3
-        val pathOfView = Path()
 
         if (isScreenOrientationPortrait()) {
             columns = num
@@ -47,10 +49,14 @@ class PuzzlePathView @JvmOverloads constructor(
             rows = num
             columns = (rows * bigSideOfPuzzlePathView) / smallSideOfPuzzlePathView
         }
+        return Pair(columns, rows)
+    }
 
-        //calculate the width and the height of the pieces
-        val pieceWidth = measuredWidth / columns
-        val pieceHeight = measuredHeight / rows
+    private fun getPathOfView(columns: Int, rows: Int): Path {
+        val pathOfView = Path()
+
+        val pieceWidth = calculatePieceWidth(columns)
+        val pieceHeight = calculatePieceHeight(rows)
 
         //create path of each piece and add it to the result array
         var yCoord = 0 //coordinate "Y" of piece
@@ -100,7 +106,17 @@ class PuzzlePathView @JvmOverloads constructor(
         return pathOfView
     }
 
-    private fun createLeftBump(path: Path, xCoord: Int, yCoord: Int, pieceHeight: Int, bumpSize: Int) {
+    private fun calculatePieceHeight(rows: Int) = measuredHeight / rows
+
+    private fun calculatePieceWidth(columns: Int) = measuredWidth / columns
+
+    private fun createLeftBump(
+        path: Path,
+        xCoord: Int,
+        yCoord: Int,
+        pieceHeight: Int,
+        bumpSize: Int
+    ) {
         path.lineTo(
             xCoord.toFloat(),
             (yCoord + pieceHeight / 3 * 2).toFloat(),
