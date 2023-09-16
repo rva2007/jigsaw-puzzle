@@ -8,7 +8,7 @@ import android.widget.ImageView
 class ImageSplitter(context: Context) {
     private val _context = context
 
-    fun onImageSplit(
+    fun getListOfPuzzles(
         imageView: ImageView?,
         number: Int,
         bigSideOfImageView: Int,
@@ -116,10 +116,7 @@ class ImageSplitter(context: Context) {
     }
 
     private fun drawBorders(canvas: Canvas, path: Path) {
-        //draw a white border
         drawWhiteBarder(canvas, path)
-
-        //draw a black border
         drawBlackBorder(canvas, path)
     }
 

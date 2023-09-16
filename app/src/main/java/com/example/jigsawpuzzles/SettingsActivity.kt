@@ -1,5 +1,6 @@
 package com.example.jigsawpuzzles
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.graphics.*
 import android.media.MediaPlayer
@@ -7,6 +8,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.view.MotionEvent
+import android.view.View
+import android.view.View.OnTouchListener
+import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -15,11 +20,13 @@ import androidx.core.view.isVisible
 import com.example.jigsawpuzzles.databinding.ActivitySettingsBinding
 import com.squareup.picasso.Picasso
 import java.io.File
+import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : AppCompatActivity(), OnTouchListener {
     private lateinit var binding: ActivitySettingsBinding
     private var isScreenOrientationPortrait by Delegates.notNull<Boolean>()
     private var pieces: ArrayList<PuzzlePiece>? = null
@@ -33,6 +40,8 @@ class SettingsActivity : AppCompatActivity() {
     private var complexity: Int? = null
     private val bigSideOfImageView = 4
     private val smallSideOfImageView = 3
+    private var xDelta = 0f
+    private var yDelta = 0f
 
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -157,7 +166,7 @@ class SettingsActivity : AppCompatActivity() {
     private var onSeekBarChangeListener: SeekBar.OnSeekBarChangeListener = object :
         SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-            this@SettingsActivity.playClickSound()
+            playClickSound()
             columns = seekBar.progress
             rows = (columns!! * bigSideOfImageView) / smallSideOfImageView
             complexity = columns!! * rows!!
@@ -187,8 +196,6 @@ class SettingsActivity : AppCompatActivity() {
         AlertDialogDemonstrator(this).showSuccessAlertDialog()
     }
 
-    private fun playSuccessSound() = MediaPlayer.create(this, R.raw.success_sound).start()
-
     private fun onButtonContinueClick() {
         playClickSound()
         binding.settingsImageView.bringToFront()
@@ -200,8 +207,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.buttonContinue.isVisible = false
         binding.battonBackPuzzle.isVisible = true
 
-        //get list of puzzles
-        pieces = ImageSplitter(this).onImageSplit(
+        pieces = ImageSplitter(this).getListOfPuzzles(
             binding.settingsImageView,
             columns!!,
             bigSideOfImageView,
@@ -209,25 +215,27 @@ class SettingsActivity : AppCompatActivity() {
             isScreenOrientationPortrait
         )
 
-        val touchListener = TouchListener(this)
-
-        //shuffle pieces order
-        pieces?.shuffle()
+        shufflePieces()
 
         for (piece in pieces!!) {
-            piece.setOnTouchListener(touchListener)
+            piece.setOnTouchListener(this)
             binding.containerLayout.addView(piece)
-            val lParams = piece.layoutParams as RelativeLayout.LayoutParams
-            if (isScreenOrientationPortrait) {
-                randomizePiecePositionOnBottomOfScreen(lParams, piece)
-            } else {
-                randomizePiecePositionOnRightOfScreen(lParams, piece)
-            }
+            randomizePiecePosition(piece)
         }
     }
 
+    private fun shufflePieces() {
+        pieces?.shuffle()
+    }
+
+    private fun randomizePiecePosition(piece: PuzzlePiece) {
+        val lParams = piece.layoutParams as RelativeLayout.LayoutParams
+        if (isScreenOrientationPortrait) randomizePiecePositionOnBottomOfScreen(lParams, piece)
+        else randomizePiecePositionOnRightOfScreen(lParams, piece)
+    }
+
     private fun onButtonBackPuzzleClick() {
-        this.playClickSound()
+        playClickSound()
 
         for (piece in pieces!!) {
             val lParams = piece.layoutParams as RelativeLayout.LayoutParams
@@ -255,10 +263,8 @@ class SettingsActivity : AppCompatActivity() {
         lParams: RelativeLayout.LayoutParams,
         piece: PuzzlePiece
     ) {
-        lParams.topMargin =
-            Random.nextInt(binding.containerLayout.height - piece.pieceHeight)
-        lParams.leftMargin =
-            binding.containerLayout.width - piece.pieceWidth
+        lParams.topMargin = Random.nextInt(binding.containerLayout.height - piece.pieceHeight)
+        lParams.leftMargin = binding.containerLayout.width - piece.pieceWidth
         piece.layoutParams = lParams
     }
 
@@ -266,17 +272,75 @@ class SettingsActivity : AppCompatActivity() {
         lParams: RelativeLayout.LayoutParams,
         piece: PuzzlePiece
     ) {
-        lParams.leftMargin = Random.nextInt(
-            binding.containerLayout.width - piece.pieceWidth
-        )
+        lParams.leftMargin = Random.nextInt(binding.containerLayout.width - piece.pieceWidth)
         lParams.topMargin = binding.containerLayout.height - piece.pieceHeight
         piece.layoutParams = lParams
     }
 
     private fun playClickSound() = MediaPlayer.create(this, R.raw.click_sound).start()
 
+    private fun playFitSound() = MediaPlayer.create(this, R.raw.fit_sound).start()
+
+    private fun playSuccessSound() = MediaPlayer.create(this, R.raw.success_sound).start()
+
     override fun onBackPressed() {
         AlertDialogDemonstrator(this).showConfirmationAlertDialog()
     }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouch(view: View?, motionEvent: MotionEvent?): Boolean {
+        val x = motionEvent!!.rawX
+        val y = motionEvent.rawY
+        val tolerance = getPermissibleDeviationOfCoordinates(view)
+        val piece = view as PuzzlePiece
+        val lParams = view.layoutParams as RelativeLayout.LayoutParams
+
+        if (piece.canMove.not()) return true
+
+        when (motionEvent.action and MotionEvent.ACTION_MASK) {
+            MotionEvent.ACTION_DOWN -> {
+                xDelta = x - lParams.leftMargin
+                yDelta = y - lParams.topMargin
+                piece.bringToFront()
+            }
+            MotionEvent.ACTION_MOVE -> {
+                lParams.leftMargin = (x - xDelta).toInt()
+                lParams.topMargin = (y - yDelta).toInt()
+                view.layoutParams = lParams
+            }
+            MotionEvent.ACTION_UP -> {
+                val xDiff = StrictMath.abs(piece.xCoord - lParams.leftMargin)
+                val yDiff = StrictMath.abs(piece.yCoord - lParams.topMargin)
+
+                if (xDiff <= tolerance && yDiff <= tolerance) {
+                    playFitSound()
+                    setPieceInItsPlace(lParams, piece)
+                    sendPieceToBack(piece)
+                    checkGameOver()
+                }
+            }
+        }
+        return true
+    }
+
+    private fun getPermissibleDeviationOfCoordinates(view: View?) =
+        sqrt(view!!.width.toDouble().pow(2.0) + view.height.toDouble().pow(2.0)) / 10
+
+    private fun setPieceInItsPlace(
+        lParams: RelativeLayout.LayoutParams,
+        piece: PuzzlePiece
+    ) {
+        lParams.leftMargin = piece.xCoord
+        lParams.topMargin = piece.yCoord
+        piece.layoutParams = lParams
+        piece.canMove = false
+    }
+
+    private fun sendPieceToBack(child: View) {
+        val parent = child.parent as ViewGroup
+        parent.removeView(child)
+        parent.addView(child, 0)
+    }
+
 
 }
