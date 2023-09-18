@@ -15,5 +15,5 @@
     <string name="get_wrong_puzzles_back">get wrong puzzles back</string>
     <string name="picture">picture</string>
     <string name="confirmation">Confirmation</string>
-    <string name="are_you_sure">Are you sure you want to quit?</string>
+    <string name="are_you_sure">Are you sure you want to exit?</string>
 </resources>

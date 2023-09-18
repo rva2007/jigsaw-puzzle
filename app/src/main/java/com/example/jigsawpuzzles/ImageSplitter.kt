@@ -43,10 +43,10 @@ class ImageSplitter(context: Context) {
                 var offsetX = 0
                 var offsetY = 0
                 if (column > 0) {
-                    offsetX = pieceWidth / 3
+                    offsetX = pieceWidth / threePartsOfWhole
                 }
                 if (row > 0) {
-                    offsetY = pieceHeight / 3
+                    offsetY = pieceHeight / threePartsOfWhole
                 }
                 val pieceBitmap = Bitmap.createBitmap(
                     bitmap,
@@ -66,7 +66,7 @@ class ImageSplitter(context: Context) {
                     pieceWidth + offsetX, pieceHeight + offsetY, Bitmap.Config.ARGB_8888
                 )
 //                //draw path
-                val bumpSize = pieceHeight / 4
+                val bumpSize = pieceHeight / fourPartsOfWhole
                 val canvas = Canvas(puzzlePiece)
                 val path = Path()
                 path.moveTo(offsetX.toFloat(), offsetY.toFloat())
@@ -157,15 +157,15 @@ class ImageSplitter(context: Context) {
         bumpSize: Int
     ) {
         path.lineTo(
-            (offsetX + (pieceBitmap.width - offsetX) / 3).toFloat(),
+            (offsetX + (pieceBitmap.width - offsetX) / threePartsOfWhole).toFloat(),
             offsetY.toFloat()
         )
         path.cubicTo(
-            ((offsetX + (pieceBitmap.width - offsetX) / 6).toFloat()),
+            ((offsetX + (pieceBitmap.width - offsetX) / sixPartsOfWhole).toFloat()),
             (offsetY - bumpSize).toFloat(),
-            ((offsetX + (pieceBitmap.width - offsetX) / 6 * 5)).toFloat(),
+            ((offsetX + (pieceBitmap.width - offsetX) / sixPartsOfWhole * fivePartsOfWhole)).toFloat(),
             (offsetY - bumpSize).toFloat(),
-            (offsetX + (pieceBitmap.width - offsetX) / 3 * 2).toFloat(),
+            (offsetX + (pieceBitmap.width - offsetX) / threePartsOfWhole * twoPartsOfWhole).toFloat(),
             offsetY.toFloat()
         )
         path.lineTo(pieceBitmap.width.toFloat(), offsetY.toFloat())
@@ -178,15 +178,15 @@ class ImageSplitter(context: Context) {
         bumpSize: Int
     ) {
         path.lineTo(
-            (offsetX + (pieceBitmap.width - offsetX) / 3 * 2).toFloat(),
+            (offsetX + (pieceBitmap.width - offsetX) / threePartsOfWhole * twoPartsOfWhole).toFloat(),
             pieceBitmap.height.toFloat()
         )
         path.cubicTo(
-            (offsetX + (pieceBitmap.width - offsetX) / 6 * 5).toFloat(),
+            (offsetX + (pieceBitmap.width - offsetX) / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
             (pieceBitmap.height - bumpSize).toFloat(),
-            (offsetX + (pieceBitmap.width - offsetX) / 6).toFloat(),
+            (offsetX + (pieceBitmap.width - offsetX) / sixPartsOfWhole).toFloat(),
             (pieceBitmap.height - bumpSize).toFloat(),
-            (offsetX + (pieceBitmap.width - offsetX) / 3).toFloat(),
+            (offsetX + (pieceBitmap.width - offsetX) / threePartsOfWhole).toFloat(),
             pieceBitmap.height.toFloat()
         )
         path.lineTo(
@@ -204,15 +204,15 @@ class ImageSplitter(context: Context) {
     ) {
         path.lineTo(
             offsetX.toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / 3 * 2).toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / threePartsOfWhole * twoPartsOfWhole).toFloat(),
         )
         path.cubicTo(
             (offsetX - bumpSize).toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / 6 * 5).toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
             (offsetX - bumpSize).toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / 6).toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / sixPartsOfWhole).toFloat(),
             offsetX.toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / 3).toFloat()
+            (offsetY + (pieceBitmap.height - offsetY) / threePartsOfWhole).toFloat()
         )
         path.close()
     }
@@ -225,15 +225,15 @@ class ImageSplitter(context: Context) {
     ) {
         path.lineTo(
             pieceBitmap.width.toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / 3).toFloat()
+            (offsetY + (pieceBitmap.height - offsetY) / threePartsOfWhole).toFloat()
         )
         path.cubicTo(
             (pieceBitmap.width - bumpSize).toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / 6).toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / sixPartsOfWhole).toFloat(),
             (pieceBitmap.width - bumpSize).toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / 6 * 5).toFloat(),
+            (offsetY + (pieceBitmap.height - offsetY) / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
             pieceBitmap.width.toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / 3 * 2).toFloat()
+            (offsetY + (pieceBitmap.height - offsetY) / threePartsOfWhole * twoPartsOfWhole).toFloat()
         )
         path.lineTo(
             pieceBitmap.width.toFloat(),
@@ -269,7 +269,12 @@ class ImageSplitter(context: Context) {
         )
     }
 
-
-
+    companion object {
+        const val twoPartsOfWhole = 2
+        const val threePartsOfWhole = 3
+        const val fourPartsOfWhole = 4
+        const val fivePartsOfWhole = 5
+        const val sixPartsOfWhole = 6
+    }
 
 }
