@@ -38,8 +38,6 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
     private var columns: Int? = null
     private var rows: Int? = null
     private var complexity: Int? = null
-    private val bigSideOfImageView = 4
-    private val smallSideOfImageView = 3
     private var xDelta = 0f
     private var yDelta = 0f
 
@@ -131,13 +129,13 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
     private fun getLandscapeTargetDimensions(screenHeight: Int) {
         //targetHeight is 80% from screenHeight
-        targetHeight = screenHeight - ((screenHeight / 100) * 20)
+        targetHeight = screenHeight - ((screenHeight / oneHundredPercent) * twentyPercent)
         targetWidth = (targetHeight!! / smallSideOfImageView) * bigSideOfImageView
     }
 
     private fun getPortraitTargetDimensions(screenWidth: Int) {
         //targetWidth is 80% from screenWidth
-        targetWidth = screenWidth - ((screenWidth / 100) * 20)
+        targetWidth = screenWidth - ((screenWidth / oneHundredPercent) * twentyPercent)
         targetHeight = (targetWidth!! / smallSideOfImageView) * bigSideOfImageView
     }
 
@@ -324,7 +322,9 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
     }
 
     private fun getPermissibleDeviationOfCoordinates(view: View?) =
-        sqrt(view!!.width.toDouble().pow(2.0) + view.height.toDouble().pow(2.0)) / 10
+        sqrt(
+            view!!.width.toDouble().pow(2.0) + view.height.toDouble().pow(2.0)
+        ) / settingUpTolerance
 
     private fun setPieceInItsPlace(
         lParams: RelativeLayout.LayoutParams,
@@ -340,6 +340,14 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
         val parent = child.parent as ViewGroup
         parent.removeView(child)
         parent.addView(child, 0)
+    }
+
+    companion object {
+        const val bigSideOfImageView = 4
+        const val smallSideOfImageView = 3
+        const val oneHundredPercent = 100
+        const val twentyPercent = 20
+        const val settingUpTolerance = 10
     }
 
 

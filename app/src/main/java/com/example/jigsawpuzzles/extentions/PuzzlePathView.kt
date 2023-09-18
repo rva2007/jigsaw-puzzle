@@ -15,7 +15,6 @@ class PuzzlePathView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : AppCompatImageView(context, attrs, defStyleAttr) {
 
-    private var numberForCalculateColumnsAndRowsByDefault: Int = 4
     var num: Int = numberForCalculateColumnsAndRowsByDefault
     private var paint: Paint = Paint().apply {
         style = Paint.Style.STROKE
@@ -39,8 +38,6 @@ class PuzzlePathView @JvmOverloads constructor(
     private fun calculateNumberColumnsAndRows(num: Int): Pair<Int, Int> {
         val columns: Int?
         val rows: Int?
-        val bigSideOfPuzzlePathView = 4
-        val smallSideOfPuzzlePathView = 3
 
         if (isScreenOrientationPortrait()) {
             columns = num
@@ -240,6 +237,9 @@ class PuzzlePathView @JvmOverloads constructor(
     }
 
     companion object {
+        const val numberForCalculateColumnsAndRowsByDefault: Int = 4
+        const val bigSideOfPuzzlePathView = 4
+        const val smallSideOfPuzzlePathView = 3
         const val twoPartsOfWhole = 2
         const val threePartsOfWhole = 3
         const val fourPartsOfWhole = 4
