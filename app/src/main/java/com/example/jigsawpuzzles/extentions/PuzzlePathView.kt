@@ -15,8 +15,8 @@ class PuzzlePathView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : AppCompatImageView(context, attrs, defStyleAttr) {
 
-    private var numberByDefault: Int = 4
-    var num: Int = numberByDefault
+    private var numberForCalculateColumnsAndRowsByDefault: Int = 4
+    var num: Int = numberForCalculateColumnsAndRowsByDefault
     private var paint: Paint = Paint().apply {
         style = Paint.Style.STROKE
         color = resources.getColor(R.color.brown, null)
@@ -63,7 +63,7 @@ class PuzzlePathView @JvmOverloads constructor(
         for (row in 0 until rows) {
             var xCoord = 0 //coordinate "X" of piece
             for (column in 0 until columns) {
-                val bumpSize = pieceHeight / 4
+                val bumpSize = pieceHeight / fourPartsOfWhole
                 val pathOfPiece = Path()
 
                 pathOfPiece.moveTo(xCoord.toFloat(), yCoord.toFloat())
@@ -119,15 +119,15 @@ class PuzzlePathView @JvmOverloads constructor(
     ) {
         path.lineTo(
             xCoord.toFloat(),
-            (yCoord + pieceHeight / 3 * 2).toFloat(),
+            (yCoord + pieceHeight / threePartsOfWhole * twoPartsOfWhole).toFloat(),
         )
         path.cubicTo(
             (xCoord - bumpSize).toFloat(),
-            (yCoord + pieceHeight / 6 * 5).toFloat(),
+            (yCoord + pieceHeight / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
             (xCoord - bumpSize).toFloat(),
-            (yCoord + pieceHeight / 6).toFloat(),
+            (yCoord + pieceHeight / sixPartsOfWhole).toFloat(),
             xCoord.toFloat(),
-            (yCoord + pieceHeight / 3).toFloat()
+            (yCoord + pieceHeight / threePartsOfWhole).toFloat()
         )
     }
 
@@ -140,15 +140,15 @@ class PuzzlePathView @JvmOverloads constructor(
         bumpSize: Int
     ) {
         path.lineTo(
-            (xCoord + pieceWidth / 3 * 2).toFloat(),
+            (xCoord + pieceWidth / threePartsOfWhole * twoPartsOfWhole).toFloat(),
             yCoord.toFloat() + pieceHeight.toFloat()
         )
         path.cubicTo(
-            (xCoord + pieceWidth / 6 * 5).toFloat(),
+            (xCoord + pieceWidth / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
             (yCoord + pieceHeight - bumpSize).toFloat(),
-            (xCoord + pieceWidth / 6).toFloat(),
+            (xCoord + pieceWidth / sixPartsOfWhole).toFloat(),
             (yCoord + pieceHeight - bumpSize).toFloat(),
-            (xCoord + pieceWidth / 3).toFloat(),
+            (xCoord + pieceWidth / threePartsOfWhole).toFloat(),
             yCoord.toFloat() + pieceHeight.toFloat()
         )
         path.lineTo(
@@ -178,15 +178,15 @@ class PuzzlePathView @JvmOverloads constructor(
     ) {
         path.lineTo(
             (xCoord + pieceWidth).toFloat(),
-            (yCoord + pieceHeight / 3).toFloat()
+            (yCoord + pieceHeight / threePartsOfWhole).toFloat()
         )
         path.cubicTo(
             (xCoord + pieceWidth - bumpSize).toFloat(),
-            (yCoord + pieceHeight / 6).toFloat(),
+            (yCoord + pieceHeight / sixPartsOfWhole).toFloat(),
             (xCoord + pieceWidth - bumpSize).toFloat(),
-            (yCoord + pieceHeight / 6 * 5).toFloat(),
+            (yCoord + pieceHeight / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
             xCoord.toFloat() + pieceWidth.toFloat(),
-            (yCoord + pieceHeight / 3 * 2).toFloat()
+            (yCoord + pieceHeight / threePartsOfWhole * twoPartsOfWhole).toFloat()
         )
         path.lineTo(
             xCoord.toFloat() + pieceWidth.toFloat(),
@@ -211,13 +211,13 @@ class PuzzlePathView @JvmOverloads constructor(
         yCoord: Int,
         bumpSize: Int
     ) {
-        path.lineTo((xCoord + pieceWidth / 3).toFloat(), yCoord.toFloat())
+        path.lineTo((xCoord + pieceWidth / threePartsOfWhole).toFloat(), yCoord.toFloat())
         path.cubicTo(
-            (xCoord + pieceWidth / 6).toFloat(),
+            (xCoord + pieceWidth / sixPartsOfWhole).toFloat(),
             (yCoord - bumpSize).toFloat(),
-            ((xCoord + pieceWidth / 6 * 5)).toFloat(),
+            ((xCoord + pieceWidth / sixPartsOfWhole * fivePartsOfWhole)).toFloat(),
             (yCoord - bumpSize).toFloat(),
-            (xCoord + pieceWidth / 3 * 2).toFloat(),
+            (xCoord + pieceWidth / threePartsOfWhole * twoPartsOfWhole).toFloat(),
             yCoord.toFloat()
         )
         path.lineTo(xCoord.toFloat() + pieceWidth.toFloat(), yCoord.toFloat())
@@ -238,5 +238,14 @@ class PuzzlePathView @JvmOverloads constructor(
             else -> false
         }
     }
+
+    companion object {
+        const val twoPartsOfWhole = 2
+        const val threePartsOfWhole = 3
+        const val fourPartsOfWhole = 4
+        const val fivePartsOfWhole = 5
+        const val sixPartsOfWhole = 6
+    }
+
 
 }
