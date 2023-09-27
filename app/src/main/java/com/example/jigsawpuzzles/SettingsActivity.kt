@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.example.jigsawpuzzles.databinding.ActivitySettingsBinding
+import com.example.jigsawpuzzles.extentions.PuzzlePathView
 import com.squareup.picasso.Picasso
 import java.io.File
 import kotlin.math.pow
@@ -41,12 +42,10 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
     private var xDelta = 0f
     private var yDelta = 0f
 
-
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val intent = intent
-
         val orientation = intent.getStringExtra("orientation")
         if (orientation != null) getScreenOrientation(orientation)
 
@@ -310,7 +309,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
                 val xDiff = StrictMath.abs(piece.xCoord - lParams.leftMargin)
                 val yDiff = StrictMath.abs(piece.yCoord - lParams.topMargin)
 
-                if (xDiff <= tolerance && yDiff <= tolerance) {
+                if (isPieceCloseEnoughToItsPlace(tolerance, xDiff, yDiff)) {
                     playFitSound()
                     setPieceInItsPlace(lParams, piece)
                     sendPieceToBack(piece)
@@ -320,6 +319,12 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
         }
         return true
     }
+
+    private fun isPieceCloseEnoughToItsPlace(
+        tolerance: Double,
+        xDiff: Int,
+        yDiff: Int
+    ) = xDiff <= tolerance && yDiff <= tolerance
 
     private fun getPermissibleDeviationOfCoordinates(view: View?) =
         sqrt(
