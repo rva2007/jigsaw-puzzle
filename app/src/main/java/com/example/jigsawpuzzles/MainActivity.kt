@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -88,6 +89,13 @@ class MainActivity : AppCompatActivity() {
         setClickListeners()
 
         getImagesFromAssets()
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                AlertDialogDemonstrator(this@MainActivity).showConfirmationAlertDialog()
+            }
+
+        })
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -263,10 +271,6 @@ class MainActivity : AppCompatActivity() {
                     this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ) != PackageManager.PERMISSION_GRANTED).not()
-    }
-
-    override fun onBackPressed() {
-        AlertDialogDemonstrator(this).showConfirmationAlertDialog()
     }
 
     companion object {

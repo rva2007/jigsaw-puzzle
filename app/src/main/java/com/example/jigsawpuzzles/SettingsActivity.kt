@@ -12,13 +12,15 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.example.jigsawpuzzles.databinding.ActivitySettingsBinding
-import com.example.jigsawpuzzles.extentions.PuzzlePathView
 import com.squareup.picasso.Picasso
 import java.io.File
 import kotlin.math.pow
@@ -124,6 +126,13 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
                     .into(binding.settingsImageView)
             }
         }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                AlertDialogDemonstrator(this@SettingsActivity).showConfirmationAlertDialog()
+            }
+
+        })
     }
 
     private fun getLandscapeTargetDimensions(screenHeight: Int) {
@@ -249,12 +258,12 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
                 ) {
                     //this is the place for the animation code
 
-
                     randomizePiecePositionOnRightOfScreen(lParams, piece)
                 }
             }
         }
     }
+
 
     private fun randomizePiecePositionOnRightOfScreen(
         lParams: RelativeLayout.LayoutParams,
@@ -279,10 +288,6 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
     private fun playFitSound() = MediaPlayer.create(this, R.raw.fit_sound).start()
 
     private fun playSuccessSound() = MediaPlayer.create(this, R.raw.success_sound).start()
-
-    override fun onBackPressed() {
-        AlertDialogDemonstrator(this).showConfirmationAlertDialog()
-    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(view: View?, motionEvent: MotionEvent?): Boolean {
