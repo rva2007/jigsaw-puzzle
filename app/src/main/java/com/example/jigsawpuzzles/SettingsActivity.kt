@@ -12,8 +12,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
@@ -172,7 +170,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
     private var onSeekBarChangeListener: SeekBar.OnSeekBarChangeListener = object :
         SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-            playClickSound()
+            GameSounds(this@SettingsActivity).playClickSound()
             columns = seekBar.progress
             rows = (columns!! * bigSideOfImageView) / smallSideOfImageView
             complexity = columns!! * rows!!
@@ -198,12 +196,12 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
     fun checkGameOver() {
         if (isGameOver().not()) return
-        playSuccessSound()
+        GameSounds(this@SettingsActivity).playSuccessSound()
         AlertDialogDemonstrator(this).showSuccessAlertDialog()
     }
 
     private fun onButtonContinueClick() {
-        playClickSound()
+        GameSounds(this@SettingsActivity).playClickSound()
         binding.settingsImageView.bringToFront()
         binding.settingsImageView.alpha = 0.3f
         binding.containerLayout.bringToFront()
@@ -241,27 +239,29 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
     }
 
     private fun onButtonBackPuzzleClick() {
-        playClickSound()
+        GameSounds(this@SettingsActivity).playClickSound()
 
         for (piece in pieces!!) {
-            val lParams = piece.layoutParams as RelativeLayout.LayoutParams
             if (piece.canMove) {
-                if (isScreenOrientationPortrait
-                    && (lParams.topMargin != binding.containerLayout.height - piece.pieceHeight)
-                ) {
-                    //this is the place for the animation code
-
-
-                    randomizePiecePositionOnBottomOfScreen(lParams, piece)
-                } else if (isScreenOrientationPortrait.not()
-                    && lParams.leftMargin != binding.containerLayout.width - piece.pieceWidth
-                ) {
-                    //this is the place for the animation code
-
-                    randomizePiecePositionOnRightOfScreen(lParams, piece)
+                if (isScreenOrientationPortrait && isPieceNotInLowermostPlace(piece)) {
+                    AnimationReturnOfPieces(this, piece, binding.containerLayout)
+                        .showAnimationForOrientationPortrait()
+                } else if (isScreenOrientationPortrait.not() && isPieceNotInRightmostPlace(piece)) {
+                    AnimationReturnOfPieces(this, piece, binding.containerLayout)
+                        .showAnimationForOrientationLandscape()
                 }
             }
         }
+    }
+
+    private fun isPieceNotInRightmostPlace(piece: PuzzlePiece): Boolean {
+        val lParams = piece.layoutParams as RelativeLayout.LayoutParams
+        return lParams.leftMargin != binding.containerLayout.width - piece.pieceWidth
+    }
+
+    private fun isPieceNotInLowermostPlace(piece: PuzzlePiece): Boolean {
+        val lParams = piece.layoutParams as RelativeLayout.LayoutParams
+        return lParams.topMargin != binding.containerLayout.height - piece.pieceHeight
     }
 
 
@@ -283,11 +283,6 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
         piece.layoutParams = lParams
     }
 
-    private fun playClickSound() = MediaPlayer.create(this, R.raw.click_sound).start()
-
-    private fun playFitSound() = MediaPlayer.create(this, R.raw.fit_sound).start()
-
-    private fun playSuccessSound() = MediaPlayer.create(this, R.raw.success_sound).start()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(view: View?, motionEvent: MotionEvent?): Boolean {
@@ -315,7 +310,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
                 val yDiff = StrictMath.abs(piece.yCoord - lParams.topMargin)
 
                 if (isPieceCloseEnoughToItsPlace(tolerance, xDiff, yDiff)) {
-                    playFitSound()
+                    GameSounds(this@SettingsActivity).playFitSound()
                     setPieceInItsPlace(lParams, piece)
                     sendPieceToBack(piece)
                     checkGameOver()
