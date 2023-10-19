@@ -13,5 +13,7 @@ class GameSounds(val context: Context) {
 
      fun playSoundEndOfMovement() = MediaPlayer.create(context, R.raw.end_of_movement_sound).start()
 
-
+     fun stopMediaPlayer() {
+          if (MediaPlayer().isPlaying) MediaPlayer().stop()
+     }
 }

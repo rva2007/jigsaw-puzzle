@@ -137,20 +137,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        stopMediaPlayer()
+        GameSounds(this).stopMediaPlayer()
     }
 
-    private fun stopMediaPlayer() {
-        if (MediaPlayer().isPlaying) MediaPlayer().stop()
-    }
 
     private fun getImagesFromAssets() {
         val assetManager = assets
 
         try {
             val files = assetManager.list("img")
-            binding.gridView?.adapter = GridViewAdapter(this@MainActivity)
-            binding.gridView?.onItemClickListener = AdapterView
+            binding.gridView.adapter = GridViewAdapter(this@MainActivity)
+            binding.gridView.onItemClickListener = AdapterView
                 .OnItemClickListener { _, _, i, _ ->
                     playClickSound()
                     val path = "img/" + (files!![i % files.size]).toString()

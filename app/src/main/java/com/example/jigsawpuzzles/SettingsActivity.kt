@@ -3,7 +3,6 @@ package com.example.jigsawpuzzles
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.graphics.*
-import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -54,7 +53,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
         hideActionBar()
 
-        val metrics: DisplayMetrics = this.getResources().getDisplayMetrics()
+        val metrics: DisplayMetrics = this.resources.displayMetrics
         val screenWidth: Int = metrics.widthPixels
         val screenHeight: Int = metrics.heightPixels
 
@@ -117,7 +116,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
             val stringAssets = intent.getStringExtra("assets")
             if (stringAssets != null) {
-                val imageUri = Uri.fromFile(File("//android_asset/" + stringAssets))
+                val imageUri = Uri.fromFile(File("//android_asset/$stringAssets"))
                 Picasso.get()
                     .load(imageUri)
                     .fit()
@@ -160,12 +159,9 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        stopMediaPlayer()
+       GameSounds(this).stopMediaPlayer()
     }
 
-    private fun stopMediaPlayer() {
-        if (MediaPlayer().isPlaying) MediaPlayer().stop()
-    }
 
     private var onSeekBarChangeListener: SeekBar.OnSeekBarChangeListener = object :
         SeekBar.OnSeekBarChangeListener {
@@ -194,7 +190,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
         return true
     }
 
-    fun checkGameOver() {
+    private fun checkGameOver() {
         if (isGameOver().not()) return
         GameSounds(this@SettingsActivity).playSuccessSound()
         AlertDialogDemonstrator(this).showSuccessAlertDialog()
@@ -246,9 +242,12 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
                 if (isScreenOrientationPortrait && isPieceNotInLowermostPlace(piece)) {
                     AnimationReturnOfPieces(this, piece, binding.containerLayout)
                         .showAnimationForOrientationPortrait()
-                } else if (isScreenOrientationPortrait.not() && isPieceNotInRightmostPlace(piece)) {
+                    continue
+                }
+                if (isScreenOrientationPortrait.not() && isPieceNotInRightmostPlace(piece)) {
                     AnimationReturnOfPieces(this, piece, binding.containerLayout)
                         .showAnimationForOrientationLandscape()
+                    continue
                 }
             }
         }
