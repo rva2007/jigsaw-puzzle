@@ -3,15 +3,14 @@ package com.example.jigsawpuzzles
 import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
-import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.TextUtils
-import androidx.annotation.Nullable
+import androidx.exifinterface.media.ExifInterface
 import java.io.*
 
 
-class ImageOrientationUtil {
+open class ImageOrientationUtil {
     private val SCHEME_FILE = "file"
     private val SCHEME_CONTENT = "content"
 
@@ -48,7 +47,7 @@ class ImageOrientationUtil {
     ): File? {
         if (uri == null) return null
         if (SCHEME_FILE == uri.scheme) {
-            return File(uri.path)
+            return uri.path?.let { File(it) }
         } else if (SCHEME_CONTENT == uri.scheme) {
             val filePathColumn =
                 arrayOf(MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.DISPLAY_NAME)
@@ -89,7 +88,6 @@ class ImageOrientationUtil {
     }
 
 
-    @Nullable
     private fun getFromMediaUriPfd(context: Context, resolver: ContentResolver, uri: Uri?): File? {
         if (uri == null) return null
         var input: FileInputStream? = null
@@ -105,7 +103,7 @@ class ImageOrientationUtil {
             while (input.read(bytes).also { read = it } != -1) {
                 output.write(bytes, 0, read)
             }
-            return File(tempFilename)
+            return tempFilename?.let { File(it) }
         } catch (ignored: IOException) {
             // Nothing we can do
         } finally {

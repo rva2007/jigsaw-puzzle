@@ -9,14 +9,12 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -36,7 +34,6 @@ class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     private var bitmap: Bitmap? = null
 
-    @RequiresApi(Build.VERSION_CODES.P)
     private val takeImageResult =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
             if (isSuccess) {
@@ -57,16 +54,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    @RequiresApi(Build.VERSION_CODES.P)
     private val selectImageFromGalleryResult =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
+
+
+
+
                 val source = ImageDecoder.createSource(this.contentResolver, it)
                 bitmap = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
                     decoder.setTargetSampleSize(1) // shrinking by
                     decoder.isMutableRequired =
                         true // this resolve the hardware type of bitmap problem
                 }
+
+
+
+
                 val intent = Intent(this, SettingsActivity::class.java)
                 intent.putExtra("orientation", getOrientationScreen(bitmap!!))
                 intent.putExtra("gallery", uri.toString())
@@ -78,8 +82,18 @@ class MainActivity : AppCompatActivity() {
 
     private var latestTmpUri: Uri? = null
 
+    private fun getRotationInDegrees(uri: Uri): Int {
+        return ImageOrientationUtil()
+            .getExifRotation(
+                ImageOrientationUtil()
+                    .getFromMediaUri(
+                        this,
+                        contentResolver,
+                        uri
+                    )
+            )
+    }
 
-    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -98,17 +112,14 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    @RequiresApi(Build.VERSION_CODES.P)
     private fun setClickListeners() {
         binding.buttonCamera.setOnClickListener { takeImage() }
         binding.buttonGallery.setOnClickListener { selectImageFromGallery() }
     }
 
-    @RequiresApi(Build.VERSION_CODES.P)
     private fun selectImageFromGallery() = selectImageFromGalleryResult.launch("image/*")
 
 
-    @RequiresApi(Build.VERSION_CODES.P)
     private fun takeImage() {
         lifecycleScope.launch {
             // Suspend until you are STARTED
@@ -226,7 +237,7 @@ class MainActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
