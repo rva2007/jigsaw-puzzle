@@ -9,6 +9,7 @@
         android:layout_height="308dp"
         android:layout_margin="5dp"
         app:cardCornerRadius="5dp"
+        android:backgroundTint="@color/pale_brown"
         app:cardElevation="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

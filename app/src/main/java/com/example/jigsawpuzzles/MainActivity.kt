@@ -28,6 +28,8 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.IOException
 
+// This app used photos by Andrey Pavlov (known on the Internet by the nickname Antrey)
+
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var bitmap: Bitmap
