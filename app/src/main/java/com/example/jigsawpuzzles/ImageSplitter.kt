@@ -9,7 +9,7 @@ class ImageSplitter(context: Context) {
     private val _context = context
 
     fun getListOfPuzzles(
-        imageView: ImageView?,
+        imageView: ImageView,
         number: Int,
         bigSideOfImageView: Int,
         smallSideOfImageView: Int,
@@ -27,12 +27,12 @@ class ImageSplitter(context: Context) {
         }
         val piecesNumber = columns * rows
         val pieces = ArrayList<PuzzlePiece>(piecesNumber)
-        val drawable = imageView?.drawable as BitmapDrawable
+        val drawable = imageView.drawable as BitmapDrawable
         val bitmap = drawable.bitmap
 
-        //calculate the width and the height of the pieces
-        val pieceWidth = imageView.width / columns
-        val pieceHeight = imageView.height / rows
+         //calculate the width and the height of the pieces
+        val pieceWidth = (imageView.width / columns) - compensationValue
+        val pieceHeight = (imageView.height / rows) - compensationValue
 
         //create each bitmap piece and add it to the result array
         var yCoord = 0
@@ -270,6 +270,7 @@ class ImageSplitter(context: Context) {
     }
 
     companion object {
+        const val compensationValue = 1
         const val twoPartsOfWhole = 2
         const val threePartsOfWhole = 3
         const val fourPartsOfWhole = 4

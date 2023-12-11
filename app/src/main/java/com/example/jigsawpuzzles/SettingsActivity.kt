@@ -3,7 +3,6 @@ package com.example.jigsawpuzzles
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.graphics.*
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -17,9 +16,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.bumptech.glide.Glide
 import com.example.jigsawpuzzles.databinding.ActivitySettingsBinding
-import com.squareup.picasso.Picasso
-import java.io.File
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
@@ -96,30 +94,28 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
         binding.puzzlePathView.layoutParams = params
 
         binding.settingsImageView.post {
-            val stringGallery = intent.getStringExtra("gallery")
-            if (stringGallery != null) {
-                val uriFromGallery = Uri.parse(stringGallery)
-                Picasso.get()
-                    .load(uriFromGallery)
-                    .fit()
+            val imageFromCamera = intent.getStringExtra("camera")
+            if (imageFromCamera != null) {
+                Glide.with(applicationContext)
+                    .asBitmap()
+                    .load(imageFromCamera)
                     .into(binding.settingsImageView)
             }
 
-            val stringCamera = intent.getStringExtra("camera")
-            if (stringCamera != null) {
-                val uriFromCamera = Uri.parse(stringCamera)
-                Picasso.get()
-                    .load(uriFromCamera)
-                    .fit()
+
+            val imageFromGallery = intent.getStringExtra("gallery")
+            if (imageFromGallery != null) {
+                Glide.with(applicationContext)
+                    .asBitmap()
+                    .load(imageFromGallery)
                     .into(binding.settingsImageView)
             }
 
-            val stringAssets = intent.getStringExtra("assets")
-            if (stringAssets != null) {
-                val imageUri = Uri.fromFile(File("//android_asset/$stringAssets"))
-                Picasso.get()
-                    .load(imageUri)
-                    .fit()
+            val imageFromAssets = intent.getStringExtra("assets")
+            if (imageFromAssets != null) {
+                Glide.with(applicationContext)
+                    .asBitmap()
+                    .load("file:///android_asset/$imageFromAssets")
                     .into(binding.settingsImageView)
             }
         }

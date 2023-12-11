@@ -5,9 +5,6 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
-import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -23,76 +20,73 @@ import androidx.core.content.FileProvider
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withStarted
+import com.bumptech.glide.Glide
 import com.example.jigsawpuzzles.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.IOException
-import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
-    lateinit var binding: ActivityMainBinding
-    private var bitmap: Bitmap? = null
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var bitmap: Bitmap
+    private var latestTmpUri: Uri? = null
+
+
+    private val selectImageFromGalleryResult =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                runBlocking {
+                    launch(Dispatchers.IO) {
+                        bitmap = Glide.with(applicationContext)
+                            .asBitmap()
+                            .load("$uri")
+                            .submit()
+                            .get()
+                    }
+                }
+
+                val screenOrientation =
+                    if (bitmap.width > bitmap.height) "landscape" else "portrait"
+
+                val intent = Intent(applicationContext, SettingsActivity::class.java)
+                intent.putExtra("orientation", screenOrientation)
+                intent.putExtra("gallery", uri.toString())
+                startActivity(intent)
+                bitmap.recycle()
+                finish()
+            }
+        }
 
     private val takeImageResult =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
             if (isSuccess) {
                 latestTmpUri?.let { uri ->
-                    val source = ImageDecoder.createSource(this.contentResolver, uri)
-                    bitmap = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                        decoder.setTargetSampleSize(1) // shrinking by
-                        decoder.isMutableRequired =
-                            true // this resolve the hardware type of bitmap problem
+
+                    runBlocking {
+                        launch(Dispatchers.IO) {
+                            bitmap = Glide.with(applicationContext)
+                                .asBitmap()
+                                .load("$uri")
+                                .submit()
+                                .get()
+                        }
                     }
-                    val intent = Intent(this, SettingsActivity::class.java)
-                    intent.putExtra("orientation", getOrientationScreen(bitmap!!))
+
+                    val screenOrientation =
+                        if (bitmap.width > bitmap.height) "landscape" else "portrait"
+
+                    val intent = Intent(applicationContext, SettingsActivity::class.java)
+                    intent.putExtra("orientation", screenOrientation)
                     intent.putExtra("camera", uri.toString())
                     startActivity(intent)
-                    bitmap!!.recycle()
+                    bitmap.recycle()
                     finish()
                 }
             }
         }
 
-    private val selectImageFromGalleryResult =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let {
-
-
-
-
-                val source = ImageDecoder.createSource(this.contentResolver, it)
-                bitmap = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                    decoder.setTargetSampleSize(1) // shrinking by
-                    decoder.isMutableRequired =
-                        true // this resolve the hardware type of bitmap problem
-                }
-
-
-
-
-                val intent = Intent(this, SettingsActivity::class.java)
-                intent.putExtra("orientation", getOrientationScreen(bitmap!!))
-                intent.putExtra("gallery", uri.toString())
-                startActivity(intent)
-                bitmap!!.recycle()
-                finish()
-            }
-        }
-
-    private var latestTmpUri: Uri? = null
-
-    private fun getRotationInDegrees(uri: Uri): Int {
-        return ImageOrientationUtil()
-            .getExifRotation(
-                ImageOrientationUtil()
-                    .getFromMediaUri(
-                        this,
-                        contentResolver,
-                        uri
-                    )
-            )
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -104,17 +98,12 @@ class MainActivity : AppCompatActivity() {
 
         getImagesFromAssets()
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true){
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 AlertDialogDemonstrator(this@MainActivity).showConfirmationAlertDialog()
             }
 
         })
-    }
-
-    private fun setClickListeners() {
-        binding.buttonCamera.setOnClickListener { takeImage() }
-        binding.buttonGallery.setOnClickListener { selectImageFromGallery() }
     }
 
     private fun selectImageFromGallery() = selectImageFromGalleryResult.launch("image/*")
@@ -146,6 +135,18 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private fun setClickListeners() {
+        binding.buttonCamera.setOnClickListener {
+            takeImage()
+            GameSounds(this@MainActivity).playClickSound()
+        }
+        binding.buttonGallery.setOnClickListener {
+            selectImageFromGallery()
+            GameSounds(this@MainActivity).playClickSound()
+        }
+    }
+
+
     override fun onDestroy() {
         super.onDestroy()
         GameSounds(this).stopMediaPlayer()
@@ -157,44 +158,58 @@ class MainActivity : AppCompatActivity() {
 
         try {
             val files = assetManager.list("img")
+
             binding.gridView.adapter = GridViewAdapter(this@MainActivity)
-            binding.gridView.onItemClickListener = AdapterView
-                .OnItemClickListener { _, _, i, _ ->
-                    playClickSound()
-                    val path = "img/" + (files!![i % files.size]).toString()
-                    val uri = Uri.parse(path)
-                    bitmap = getAssetsBitmap(path)
-                    val intent = Intent(applicationContext, SettingsActivity::class.java)
-                    intent.putExtra("orientation", getOrientationScreen(bitmap!!))
-                    intent.putExtra("assets", uri.toString())
-                    startActivity(intent)
-                    bitmap!!.recycle()
-                    finish()
+            binding.gridView.onItemClickListener = AdapterView.OnItemClickListener { _, _, i, _ ->
+                val path = "img/" + (files!![i % files.size]).toString()
+                val uri = Uri.parse(path)
+
+                runBlocking {
+                    launch(Dispatchers.IO) {
+                        bitmap = Glide.with(applicationContext)
+                            .asBitmap()
+                            .load("file:///android_asset/$uri")
+                            .submit()
+                            .get()
+                    }
                 }
+
+                GameSounds(this@MainActivity).playClickSound()
+
+                val screenOrientation =
+                    if (bitmap.width > bitmap.height) "landscape" else "portrait"
+
+                val intent = Intent(applicationContext, SettingsActivity::class.java)
+                intent.putExtra("orientation", screenOrientation)
+                intent.putExtra("assets", uri.toString())
+                startActivity(intent)
+                bitmap.recycle()
+                finish()
+            }
         } catch (e: IOException) {
             e.printStackTrace()
             Toast.makeText(this, e.localizedMessage, Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun playClickSound() = MediaPlayer.create(this, R.raw.click_sound).start()
-
-    private fun getOrientationScreen(bitmap: Bitmap): String {
-        return if (bitmap.width > bitmap.height) "landscape" else "portrait"
-    }
-
-    private fun getAssetsBitmap(str: String): Bitmap? {
-        val inputStream: InputStream
-        var bitmap: Bitmap? = null
-        try {
-            inputStream = applicationContext.assets.open(str)
-            bitmap = BitmapFactory.decodeStream(inputStream)
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-            Toast.makeText(this, e.localizedMessage, Toast.LENGTH_SHORT).show()
-        }
-        return bitmap
-    }
+//    private fun playClickSound() = MediaPlayer.create(this, R.raw.click_sound).start()
+//
+//    private fun getOrientationScreen(bitmap: Bitmap): String {
+//        return if (bitmap.width > bitmap.height) "landscape" else "portrait"
+//    }
+//
+//    private fun getAssetsBitmap(str: String): Bitmap? {
+//        val inputStream: InputStream
+//        var bitmap: Bitmap? = null
+//        try {
+//            inputStream = applicationContext.assets.open(str)
+//            bitmap = BitmapFactory.decodeStream(inputStream)
+//        } catch (e: FileNotFoundException) {
+//            e.printStackTrace()
+//            Toast.makeText(this, e.localizedMessage, Toast.LENGTH_SHORT).show()
+//        }
+//        return bitmap
+//    }
 
     private fun askForPermissions(): Boolean {
         if (isPermissionsAllowed().not()) {
