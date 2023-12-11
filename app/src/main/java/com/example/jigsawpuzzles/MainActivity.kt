@@ -47,11 +47,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                val screenOrientation =
-                    if (bitmap.width > bitmap.height) "landscape" else "portrait"
-
                 val intent = Intent(applicationContext, SettingsActivity::class.java)
-                intent.putExtra("orientation", screenOrientation)
+                intent.putExtra("orientation", screenOrientation())
                 intent.putExtra("gallery", uri.toString())
                 startActivity(intent)
                 bitmap.recycle()
@@ -74,11 +71,8 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    val screenOrientation =
-                        if (bitmap.width > bitmap.height) "landscape" else "portrait"
-
                     val intent = Intent(applicationContext, SettingsActivity::class.java)
-                    intent.putExtra("orientation", screenOrientation)
+                    intent.putExtra("orientation", screenOrientation())
                     intent.putExtra("camera", uri.toString())
                     startActivity(intent)
                     bitmap.recycle()
@@ -107,7 +101,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun selectImageFromGallery() = selectImageFromGalleryResult.launch("image/*")
-
 
     private fun takeImage() {
         lifecycleScope.launch {
@@ -146,12 +139,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
         GameSounds(this).stopMediaPlayer()
     }
-
 
     private fun getImagesFromAssets() {
         val assetManager = assets
@@ -176,11 +167,8 @@ class MainActivity : AppCompatActivity() {
 
                 GameSounds(this@MainActivity).playClickSound()
 
-                val screenOrientation =
-                    if (bitmap.width > bitmap.height) "landscape" else "portrait"
-
                 val intent = Intent(applicationContext, SettingsActivity::class.java)
-                intent.putExtra("orientation", screenOrientation)
+                intent.putExtra("orientation", screenOrientation())
                 intent.putExtra("assets", uri.toString())
                 startActivity(intent)
                 bitmap.recycle()
@@ -192,24 +180,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//    private fun playClickSound() = MediaPlayer.create(this, R.raw.click_sound).start()
-//
-//    private fun getOrientationScreen(bitmap: Bitmap): String {
-//        return if (bitmap.width > bitmap.height) "landscape" else "portrait"
-//    }
-//
-//    private fun getAssetsBitmap(str: String): Bitmap? {
-//        val inputStream: InputStream
-//        var bitmap: Bitmap? = null
-//        try {
-//            inputStream = applicationContext.assets.open(str)
-//            bitmap = BitmapFactory.decodeStream(inputStream)
-//        } catch (e: FileNotFoundException) {
-//            e.printStackTrace()
-//            Toast.makeText(this, e.localizedMessage, Toast.LENGTH_SHORT).show()
-//        }
-//        return bitmap
-//    }
+    private fun screenOrientation() =
+        if (bitmap.width > bitmap.height) "landscape" else "portrait"
 
     private fun askForPermissions(): Boolean {
         if (isPermissionsAllowed().not()) {
@@ -252,7 +224,7 @@ class MainActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
@@ -262,7 +234,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun showPermissionDeniedDialog() {
         AlertDialog.Builder(this)
