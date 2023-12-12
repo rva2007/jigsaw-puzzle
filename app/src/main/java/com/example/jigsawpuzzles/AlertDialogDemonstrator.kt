@@ -44,6 +44,17 @@ class AlertDialogDemonstrator(val context: Context) {
 
 
     }
+    fun showAboutAppAlertDialog() {
+        AlertDialog.Builder(context).apply {
+            setTitle(context.getString(R.string.about_application))
+            setMessage(context.getString(R.string.authors))
+            setPositiveButton(context.getString(R.string.close)) { _, _ ->
+            }
+            setCancelable(false)
+        }.create().show()
+
+
+    }
 
 }
 

@@ -16,4 +16,9 @@
     <string name="picture">картинка</string>
     <string name="confirmation">Подтверждение</string>
     <string name="are_you_sure">Вы уверены, что хотите выйти?</string>
+    <string name="about_application">О приложении</string>
+    <string name="close">закрыть</string>
+    <string name="authors">Приложение создано Романом Рогачевым и Владимиром Рогачевым.\n\n
+        В приложении использованы фотографии Андрея Павлова
+        (известного в Интернете под ником Antrey)</string>
 </resources>
