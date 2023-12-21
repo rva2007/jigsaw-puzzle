@@ -270,7 +270,7 @@ class ImageSplitter(context: Context) {
     }
 
     companion object {
-        const val compensationValue = 1
+        const val compensationValue = 2
         const val twoPartsOfWhole = 2
         const val threePartsOfWhole = 3
         const val fourPartsOfWhole = 4
