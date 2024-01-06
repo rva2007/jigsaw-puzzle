@@ -21,4 +21,10 @@
     <string name="authors">The app was created by Roman Rogachev and Vladimir Rogachev.\n\n
         The app used photos by Andrey Pavlov
         (known on the Internet by the nickname Antrey)</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="message_for_rationale_for_gallery">To use the gallery, you need your permission to access photos
+        and media on your device</string>
+    <string name="go_to_permissions">GO TO PERMISSIONS</string>
+    <string name="cancel">CANCEL</string>
+    <string name="message_for_rationale_for_camera">To use the camera, you need your permission to take pictures and record video</string>
 </resources>

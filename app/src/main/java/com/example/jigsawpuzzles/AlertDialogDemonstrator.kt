@@ -42,8 +42,8 @@ class AlertDialogDemonstrator(val context: Context) {
             setCancelable(false)
         }.create().show()
 
-
     }
+
     fun showAboutAppAlertDialog() {
         AlertDialog.Builder(context).apply {
             setTitle(context.getString(R.string.about_application))
@@ -52,7 +52,6 @@ class AlertDialogDemonstrator(val context: Context) {
             }
             setCancelable(false)
         }.create().show()
-
 
     }
 

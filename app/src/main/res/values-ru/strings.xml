@@ -21,4 +21,12 @@
     <string name="authors">Приложение создано Романом Рогачевым и Владимиром Рогачевым.\n\n
         В приложении использованы фотографии Андрея Павлова
         (известного в Интернете под ником Antrey)</string>
+    <string name="permission_denied">Доступ запрещен</string>
+    <string name="message_for_rationale_for_gallery">Чтобы использовать галерею, вам необходимо дать разрешение
+        на доступ к фотографиям и мультимедиа на вашем устройстве</string>
+    <string name="go_to_permissions">ПЕРЕЙТИ К РАЗРЕШЕНИЯМ</string>
+    <string name="cancel">ОТМЕНА</string>
+    <string name="message_for_rationale_for_camera">Чтобы использовать камеру, вам необходимо дать разрешение
+        на съемку и запись видео</string>
+
 </resources>
