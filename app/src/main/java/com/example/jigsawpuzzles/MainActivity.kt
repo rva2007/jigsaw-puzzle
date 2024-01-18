@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.AdapterView
@@ -43,13 +44,11 @@ class MainActivity : AppCompatActivity() {
     private val selectImageFromGalleryResult =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
+
                 runBlocking {
                     launch(Dispatchers.IO) {
-                        bitmap = Glide.with(applicationContext)
-                            .asBitmap()
-                            .load("$uri")
-                            .submit()
-                            .get()
+                        bitmap =
+                            Glide.with(applicationContext).asBitmap().load("$uri").submit().get()
                     }
                 }
 
@@ -69,10 +68,7 @@ class MainActivity : AppCompatActivity() {
 
                     runBlocking {
                         launch(Dispatchers.IO) {
-                            bitmap = Glide.with(applicationContext)
-                                .asBitmap()
-                                .load("$uri")
-                                .submit()
+                            bitmap = Glide.with(applicationContext).asBitmap().load("$uri").submit()
                                 .get()
                         }
                     }
@@ -122,7 +118,13 @@ class MainActivity : AppCompatActivity() {
 
     fun registerPermissionListener() {
         permissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {}
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                val isCameraPermissionGranted = permissions[Manifest.permission.CAMERA]
+                if (isCameraPermissionGranted == true) {
+                    takeImage()
+                    GameSounds(this@MainActivity).playClickSound()
+                }
+            }
     }
 
     private fun selectImageFromGallery() = selectImageFromGalleryResult.launch("image/*")
@@ -147,9 +149,7 @@ class MainActivity : AppCompatActivity() {
             deleteOnExit()
         }
         return FileProvider.getUriForFile(
-            applicationContext,
-            "${BuildConfig.APPLICATION_ID}.provider",
-            tmpFile
+            applicationContext, "${BuildConfig.APPLICATION_ID}.provider", tmpFile
         )
     }
 
@@ -165,8 +165,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(34)
     private fun checkGalleryPermission() {
-        if (
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
             == PackageManager.PERMISSION_GRANTED
             || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
             == PackageManager.PERMISSION_GRANTED
@@ -180,8 +179,7 @@ class MainActivity : AppCompatActivity() {
             GameSounds(this@MainActivity).playClickSound()
 
         } else {
-            if (
-                shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
+            if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
                 || shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES)
                 || shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
             ) {
@@ -189,13 +187,14 @@ class MainActivity : AppCompatActivity() {
                     setTitle(getString(R.string.permission_denied))
                     setMessage(getString(R.string.message_for_rationale_for_gallery))
                     setPositiveButton(getString(R.string.go_to_permissions)) { _, _ ->
-                        permissionLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.READ_EXTERNAL_STORAGE,
-                                Manifest.permission.READ_MEDIA_IMAGES,
-                                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-                            )
-                        )
+
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        val uri = Uri.fromParts("package", packageName, null)
+                        intent.data = uri
+                        startActivity(intent)
+
+                        //todo to handle the result
+
                     }
                     setNegativeButton(getString(R.string.cancel)) { _, _ ->
                     }
@@ -213,23 +212,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun checkCameraPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            == PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
-            Toast.makeText(this, "Camera run", Toast.LENGTH_SHORT).show()
             takeImage()
             GameSounds(this@MainActivity).playClickSound()
         } else {
-            if (
-                shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
-            ) {
+            if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                 AlertDialog.Builder(this).apply {
                     setTitle(getString(R.string.permission_denied))
                     setMessage(getString(R.string.message_for_rationale_for_camera))
                     setPositiveButton(getString(R.string.go_to_permissions)) { _, _ ->
-                        permissionLauncher.launch(arrayOf(Manifest.permission.CAMERA))
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        val uri = Uri.fromParts("package", packageName, null)
+                        intent.data = uri
+                        startActivity(intent)
+                        //todo to handle the result
                     }
                     setNegativeButton(getString(R.string.cancel)) { _, _ ->
                     }
@@ -263,11 +264,8 @@ class MainActivity : AppCompatActivity() {
 
                 runBlocking {
                     launch(Dispatchers.IO) {
-                        bitmap = Glide.with(applicationContext)
-                            .asBitmap()
-                            .load("file:///android_asset/$uri")
-                            .submit()
-                            .get()
+                        bitmap = Glide.with(applicationContext).asBitmap()
+                            .load("file:///android_asset/$uri").submit().get()
                     }
                 }
 
@@ -286,7 +284,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun screenOrientation() =
-        if (bitmap.width > bitmap.height) "landscape" else "portrait"
+    private fun screenOrientation() = if (bitmap.width > bitmap.height) "landscape" else "portrait"
 
 }
