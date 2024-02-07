@@ -5,8 +5,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.AdapterView
@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withStarted
 import com.bumptech.glide.Glide
 import com.example.jigsawpuzzles.databinding.ActivityMainBinding
+import com.example.jigsawpuzzles.extentions.ApplicationDetailSettingsContract
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -35,11 +36,9 @@ import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
-
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var bitmap: Bitmap
     private var latestTmpUri: Uri? = null
-
 
     private val selectImageFromGalleryResult =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -72,7 +71,6 @@ class MainActivity : AppCompatActivity() {
                                 .get()
                         }
                     }
-
                     val intent = Intent(applicationContext, SettingsActivity::class.java)
                     intent.putExtra("orientation", screenOrientation())
                     intent.putExtra("camera", uri.toString())
@@ -82,6 +80,26 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+    private val cameraPermissionResult =
+        registerForActivityResult(ApplicationDetailSettingsContract()) {
+            if (checkSelfPermissionForCamera()
+            ) {
+                takeImage()
+                GameSounds(this@MainActivity).playClickSound()
+            }
+        }
+
+    @RequiresApi(34)
+    private val galleryPermissionResult =
+        registerForActivityResult(ApplicationDetailSettingsContract()) {
+            if (checkSelfPermissionForGallery()
+            ) {
+                selectImageFromGallery()
+                GameSounds(this@MainActivity).playClickSound()
+            }
+        }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
@@ -116,14 +134,28 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    @RequiresApi(34)
     fun registerPermissionListener() {
         permissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                val isCameraPermissionGranted = permissions[Manifest.permission.CAMERA]
-                if (isCameraPermissionGranted == true) {
+
+                val isCameraPermissionGranted = permissions[Manifest.permission.CAMERA] == true
+
+                if (isCameraPermissionGranted) {
                     takeImage()
                     GameSounds(this@MainActivity).playClickSound()
                 }
+
+                val isGalleryPermissionGranted =
+                    permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true
+                            || permissions[Manifest.permission.READ_MEDIA_IMAGES] == true
+                            || permissions[Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED] == true
+
+                if (isGalleryPermissionGranted) {
+                    selectImageFromGallery()
+                    GameSounds(this@MainActivity).playClickSound()
+                }
+
             }
     }
 
@@ -165,19 +197,10 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(34)
     private fun checkGalleryPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-            == PackageManager.PERMISSION_GRANTED
-            || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
-            == PackageManager.PERMISSION_GRANTED
-            || ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-            )
-            == PackageManager.PERMISSION_GRANTED
+        if (checkSelfPermissionForGallery()
         ) {
             selectImageFromGallery()
             GameSounds(this@MainActivity).playClickSound()
-
         } else {
             if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
                 || shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES)
@@ -187,14 +210,7 @@ class MainActivity : AppCompatActivity() {
                     setTitle(getString(R.string.permission_denied))
                     setMessage(getString(R.string.message_for_rationale_for_gallery))
                     setPositiveButton(getString(R.string.go_to_permissions)) { _, _ ->
-
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        val uri = Uri.fromParts("package", packageName, null)
-                        intent.data = uri
-                        startActivity(intent)
-
-                        //todo to handle the result
-
+                        galleryPermissionResult.launch(determineManifestPermissionForGallery())
                     }
                     setNegativeButton(getString(R.string.cancel)) { _, _ ->
                     }
@@ -212,12 +228,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(34)
+    private fun checkSelfPermissionForGallery() =
+        (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.READ_MEDIA_IMAGES
+        )
+                == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(
+            this, Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+        )
+                == PackageManager.PERMISSION_GRANTED)
+
+    @RequiresApi(34)
+    private fun determineManifestPermissionForGallery(): String {
+        val manifestPermission = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+        }
+        return manifestPermission
+    }
+
+    @RequiresApi(34)
     private fun checkCameraPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
+        if (checkSelfPermissionForCamera()) {
             takeImage()
             GameSounds(this@MainActivity).playClickSound()
         } else {
@@ -226,25 +265,22 @@ class MainActivity : AppCompatActivity() {
                     setTitle(getString(R.string.permission_denied))
                     setMessage(getString(R.string.message_for_rationale_for_camera))
                     setPositiveButton(getString(R.string.go_to_permissions)) { _, _ ->
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        val uri = Uri.fromParts("package", packageName, null)
-                        intent.data = uri
-                        startActivity(intent)
-                        //todo to handle the result
+                        cameraPermissionResult.launch(Manifest.permission.CAMERA)
                     }
                     setNegativeButton(getString(R.string.cancel)) { _, _ ->
                     }
                     setCancelable(false)
                 }.create().show()
             } else {
-                permissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.CAMERA
-                    )
-                )
+                permissionLauncher.launch(arrayOf(Manifest.permission.CAMERA))
             }
         }
     }
+
+    private fun checkSelfPermissionForCamera() = ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.CAMERA
+    ) == PackageManager.PERMISSION_GRANTED
 
     override fun onDestroy() {
         super.onDestroy()
