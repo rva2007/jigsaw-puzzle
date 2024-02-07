@@ -208,6 +208,7 @@ class MainActivity : AppCompatActivity() {
             ) {
                 AlertDialog.Builder(this).apply {
                     setTitle(getString(R.string.permission_denied))
+                    setIcon(R.drawable.ic_folder_24)
                     setMessage(getString(R.string.message_for_rationale_for_gallery))
                     setPositiveButton(getString(R.string.go_to_permissions)) { _, _ ->
                         galleryPermissionResult.launch(determineManifestPermissionForGallery())
@@ -263,6 +264,7 @@ class MainActivity : AppCompatActivity() {
             if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                 AlertDialog.Builder(this).apply {
                     setTitle(getString(R.string.permission_denied))
+                    setIcon(R.drawable.ic_camera_24)
                     setMessage(getString(R.string.message_for_rationale_for_camera))
                     setPositiveButton(getString(R.string.go_to_permissions)) { _, _ ->
                         cameraPermissionResult.launch(Manifest.permission.CAMERA)
