@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.AdapterView
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -206,17 +207,15 @@ class MainActivity : AppCompatActivity() {
                 || shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES)
                 || shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
             ) {
-                AlertDialog.Builder(this).apply {
-                    setTitle(getString(R.string.permission_denied))
-                    setIcon(R.drawable.ic_folder_24)
-                    setMessage(getString(R.string.message_for_rationale_for_gallery))
-                    setPositiveButton(getString(R.string.go_to_permissions)) { _, _ ->
+                val galleryDeniedAlertDialog =
+                    AlertDialogDemonstrator(this).showGalleryDeniedDialog()
+                val buttonPositive = galleryDeniedAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                buttonPositive.setOnClickListener {
+                    if (buttonPositive.isPressed) {
                         galleryPermissionResult.launch(determineManifestPermissionForGallery())
+                        galleryDeniedAlertDialog.dismiss()
                     }
-                    setNegativeButton(getString(R.string.cancel)) { _, _ ->
-                    }
-                    setCancelable(false)
-                }.create().show()
+                }
             } else {
                 permissionLauncher.launch(
                     arrayOf(
@@ -262,17 +261,16 @@ class MainActivity : AppCompatActivity() {
             GameSounds(this@MainActivity).playClickSound()
         } else {
             if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-                AlertDialog.Builder(this).apply {
-                    setTitle(getString(R.string.permission_denied))
-                    setIcon(R.drawable.ic_camera_24)
-                    setMessage(getString(R.string.message_for_rationale_for_camera))
-                    setPositiveButton(getString(R.string.go_to_permissions)) { _, _ ->
+                val cameraDeniedAlertDialog =
+                    AlertDialogDemonstrator(this).showCameraDeniedDialog()
+                val buttonPositive: Button =
+                    cameraDeniedAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                buttonPositive.setOnClickListener {
+                    if (buttonPositive.isPressed) {
                         cameraPermissionResult.launch(Manifest.permission.CAMERA)
+                        cameraDeniedAlertDialog.dismiss()
                     }
-                    setNegativeButton(getString(R.string.cancel)) { _, _ ->
-                    }
-                    setCancelable(false)
-                }.create().show()
+                }
             } else {
                 permissionLauncher.launch(arrayOf(Manifest.permission.CAMERA))
             }
