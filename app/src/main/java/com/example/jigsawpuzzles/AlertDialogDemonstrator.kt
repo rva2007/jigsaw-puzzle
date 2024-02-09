@@ -6,7 +6,6 @@ import android.content.Intent
 import androidx.appcompat.app.AlertDialog
 import kotlin.system.exitProcess
 
-
 class AlertDialogDemonstrator(val context: Context) {
 
     private val intent = Intent(context as Activity, MainActivity::class.java)
@@ -54,6 +53,39 @@ class AlertDialogDemonstrator(val context: Context) {
         }.create().show()
 
     }
+
+    fun showCameraDeniedDialog(): AlertDialog {
+        val builder = AlertDialog.Builder(context).apply {
+            setTitle(context.getString(R.string.permission_denied))
+            setIcon(R.drawable.ic_camera_24)
+            setMessage(context.getString(R.string.message_for_rationale_for_camera))
+            setPositiveButton(context.getString(R.string.go_to_permissions)) { _, _ ->
+            }
+            setNegativeButton(context.getString(R.string.cancel)) { _, _ ->
+            }
+            setCancelable(false)
+        }
+        val alertDialog = builder.create()
+        alertDialog.show()
+        return alertDialog
+    }
+
+    fun showGalleryDeniedDialog(): AlertDialog {
+        val builder = AlertDialog.Builder(context).apply {
+            setTitle(context.getString(R.string.permission_denied))
+            setIcon(R.drawable.ic_folder_24)
+            setMessage(context.getString(R.string.message_for_rationale_for_gallery))
+            setPositiveButton(context.getString(R.string.go_to_permissions)) { _, _ ->
+            }
+            setNegativeButton(context.getString(R.string.cancel)) { _, _ ->
+            }
+            setCancelable(false)
+        }
+        val alertDialog = builder.create()
+        alertDialog.show()
+        return alertDialog
+    }
+
 
 }
 
