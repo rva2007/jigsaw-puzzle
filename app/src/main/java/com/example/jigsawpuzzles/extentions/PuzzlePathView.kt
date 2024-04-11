@@ -12,8 +12,10 @@ import com.example.jigsawpuzzles.R
 class PuzzlePathView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : AppCompatImageView(context, attrs, defStyleAttr) {
+
+    var linesType:Int = rightAngles
 
     var num: Int = numberForCalculateColumnsAndRowsByDefault
     private var paint: Paint = Paint().apply {
@@ -30,12 +32,12 @@ class PuzzlePathView @JvmOverloads constructor(
         canvas.drawPath(path, paint)
     }
 
-    private fun preparePathOfView(num: Int): Path {
+    fun preparePathOfView(num: Int): Path {
         val (columns: Int, rows: Int) = calculateNumberColumnsAndRows(num)
-        return getPathOfView(columns, rows)
+        return getPathOfView(columns, rows, linesType)
     }
 
-    private fun calculateNumberColumnsAndRows(num: Int): Pair<Int, Int> {
+    fun calculateNumberColumnsAndRows(num: Int): Pair<Int, Int> {
         val columns: Int?
         val rows: Int?
 
@@ -49,7 +51,11 @@ class PuzzlePathView @JvmOverloads constructor(
         return Pair(columns, rows)
     }
 
-    private fun getPathOfView(columns: Int, rows: Int): Path {
+    fun calculatePieceHeight(rows: Int) = measuredHeight / rows
+
+    fun calculatePieceWidth(columns: Int) = measuredWidth / columns
+
+    private fun getPathOfView(columns: Int, rows: Int, linesType: Int): Path {
         val pathOfView = Path()
 
         val pieceWidth = calculatePieceWidth(columns)
@@ -60,39 +66,242 @@ class PuzzlePathView @JvmOverloads constructor(
         for (row in 0 until rows) {
             var xCoord = 0 //coordinate "X" of piece
             for (column in 0 until columns) {
-                val bumpSize = pieceHeight / fourPartsOfWhole
+                val bumpSize = pieceWidth / four
                 val pathOfPiece = Path()
 
                 pathOfPiece.moveTo(xCoord.toFloat(), yCoord.toFloat())
 
                 if (row == 0) {
-                    //top side piece
-                    createTopSidePiece(pathOfPiece, xCoord, pieceWidth, yCoord)
+                    //top piece side
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createTopSideOfPiece(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord
+                        )
+                        notRightAngles -> NotRightAnglesPath().createTopSideOfPiece(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord
+                        )
+                    }
+                } else if (row % 2 != 0) {
+                    //top cave
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createTopCave(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                        notRightAngles -> NotRightAnglesPath().createTopCave(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                    }
                 } else {
                     //top bump
-                    createTopBump(pathOfPiece, xCoord, pieceWidth, yCoord, bumpSize)
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createTopBump(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                        notRightAngles -> NotRightAnglesPath().createTopBump(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                    }
                 }
                 if (column == columns - 1) {
-                    //right side piece
-                    createRightSideOfPiece(pathOfPiece, xCoord, pieceWidth, yCoord, pieceHeight)
+                    //right piece side
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createRightSideOfPiece(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight
+                        )
+                        notRightAngles -> NotRightAnglesPath().createRightSideOfPiece(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight
+                        )
+                    }
+                } else if (column % 2 != 0) {
+                    //right cave
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createRightCave(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                        notRightAngles -> NotRightAnglesPath().createRightCave(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                    }
                 } else {
                     //right bump
-                    createRightBump(pathOfPiece, xCoord, pieceWidth, yCoord, pieceHeight, bumpSize)
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createRightBump(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                        notRightAngles -> NotRightAnglesPath().createRightBump(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                    }
                 }
                 if (row == rows - 1) {
-                    //bottom side piece
-                    createBottomSideOfPiece(pathOfPiece, xCoord, yCoord, pieceHeight)
+                    //bottom piece side
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createBottomSideOfPiece(
+                            pathOfPiece,
+                            xCoord,
+                            yCoord,
+                            pieceHeight
+                        )
+                        notRightAngles -> NotRightAnglesPath().createBottomSideOfPiece(
+                            pathOfPiece,
+                            xCoord,
+                            yCoord,
+                            pieceHeight
+                        )
+                    }
+                } else if (row % 2 != 0) {
+                    //bottom cave
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createBottomCave(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                        notRightAngles -> NotRightAnglesPath().createBottomCave(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                    }
                 } else {
                     //bottom bump
-                    createBottomBump(pathOfPiece, xCoord, pieceWidth, yCoord, pieceHeight, bumpSize)
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createBottomBump(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                        notRightAngles -> NotRightAnglesPath().createBottomBump(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                    }
                 }
                 if (column == 0) {
-                    //left side piece
-                    pathOfPiece.close()
+                    //left piece side
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createLeftSideOfPiece(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight
+                        )
+                        notRightAngles -> NotRightAnglesPath().createLeftSideOfPiece(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight
+                        )
+                    }
+                } else if (column % 2 != 0) {
+                    //left cave
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createLeftCave(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                        notRightAngles -> NotRightAnglesPath().createLeftCave(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                    }
                 } else {
                     //left bump
-                    createLeftBump(pathOfPiece, xCoord, yCoord, pieceHeight, bumpSize)
-                    pathOfPiece.close()
+                    when (linesType) {
+                        rightAngles -> RightAnglesPath().createLeftBump(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                        notRightAngles -> NotRightAnglesPath().createLeftBump(
+                            pathOfPiece,
+                            xCoord,
+                            pieceWidth,
+                            yCoord,
+                            pieceHeight,
+                            bumpSize
+                        )
+                    }
                 }
                 pathOfView.addPath(pathOfPiece)
                 pathOfPiece.reset()
@@ -103,133 +312,8 @@ class PuzzlePathView @JvmOverloads constructor(
         return pathOfView
     }
 
-    private fun calculatePieceHeight(rows: Int) = measuredHeight / rows
 
-    private fun calculatePieceWidth(columns: Int) = measuredWidth / columns
-
-    private fun createLeftBump(
-        path: Path,
-        xCoord: Int,
-        yCoord: Int,
-        pieceHeight: Int,
-        bumpSize: Int
-    ) {
-        path.lineTo(
-            xCoord.toFloat(),
-            (yCoord + pieceHeight / threePartsOfWhole * twoPartsOfWhole).toFloat(),
-        )
-        path.cubicTo(
-            (xCoord - bumpSize).toFloat(),
-            (yCoord + pieceHeight / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
-            (xCoord - bumpSize).toFloat(),
-            (yCoord + pieceHeight / sixPartsOfWhole).toFloat(),
-            xCoord.toFloat(),
-            (yCoord + pieceHeight / threePartsOfWhole).toFloat()
-        )
-    }
-
-    private fun createBottomBump(
-        path: Path,
-        xCoord: Int,
-        pieceWidth: Int,
-        yCoord: Int,
-        pieceHeight: Int,
-        bumpSize: Int
-    ) {
-        path.lineTo(
-            (xCoord + pieceWidth / threePartsOfWhole * twoPartsOfWhole).toFloat(),
-            yCoord.toFloat() + pieceHeight.toFloat()
-        )
-        path.cubicTo(
-            (xCoord + pieceWidth / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
-            (yCoord + pieceHeight - bumpSize).toFloat(),
-            (xCoord + pieceWidth / sixPartsOfWhole).toFloat(),
-            (yCoord + pieceHeight - bumpSize).toFloat(),
-            (xCoord + pieceWidth / threePartsOfWhole).toFloat(),
-            yCoord.toFloat() + pieceHeight.toFloat()
-        )
-        path.lineTo(
-            xCoord.toFloat(),
-            yCoord.toFloat() + pieceHeight.toFloat()
-        )
-    }
-
-    private fun createBottomSideOfPiece(
-        path: Path,
-        xCoord: Int,
-        yCoord: Int,
-        pieceHeight: Int
-    ) {
-        path.lineTo(
-            xCoord.toFloat(), yCoord.toFloat() + pieceHeight.toFloat()
-        )
-    }
-
-    private fun createRightBump(
-        path: Path,
-        xCoord: Int,
-        pieceWidth: Int,
-        yCoord: Int,
-        pieceHeight: Int,
-        bumpSize: Int
-    ) {
-        path.lineTo(
-            (xCoord + pieceWidth).toFloat(),
-            (yCoord + pieceHeight / threePartsOfWhole).toFloat()
-        )
-        path.cubicTo(
-            (xCoord + pieceWidth - bumpSize).toFloat(),
-            (yCoord + pieceHeight / sixPartsOfWhole).toFloat(),
-            (xCoord + pieceWidth - bumpSize).toFloat(),
-            (yCoord + pieceHeight / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
-            xCoord.toFloat() + pieceWidth.toFloat(),
-            (yCoord + pieceHeight / threePartsOfWhole * twoPartsOfWhole).toFloat()
-        )
-        path.lineTo(
-            xCoord.toFloat() + pieceWidth.toFloat(),
-            yCoord.toFloat() + pieceHeight.toFloat()
-        )
-    }
-
-    private fun createRightSideOfPiece(
-        path: Path,
-        xCoord: Int,
-        pieceWidth: Int,
-        yCoord: Int,
-        pieceHeight: Int
-    ) {
-        path.lineTo(xCoord.toFloat() + pieceWidth, yCoord.toFloat() + pieceHeight)
-    }
-
-    private fun createTopBump(
-        path: Path,
-        xCoord: Int,
-        pieceWidth: Int,
-        yCoord: Int,
-        bumpSize: Int
-    ) {
-        path.lineTo((xCoord + pieceWidth / threePartsOfWhole).toFloat(), yCoord.toFloat())
-        path.cubicTo(
-            (xCoord + pieceWidth / sixPartsOfWhole).toFloat(),
-            (yCoord - bumpSize).toFloat(),
-            ((xCoord + pieceWidth / sixPartsOfWhole * fivePartsOfWhole)).toFloat(),
-            (yCoord - bumpSize).toFloat(),
-            (xCoord + pieceWidth / threePartsOfWhole * twoPartsOfWhole).toFloat(),
-            yCoord.toFloat()
-        )
-        path.lineTo(xCoord.toFloat() + pieceWidth.toFloat(), yCoord.toFloat())
-    }
-
-    private fun createTopSidePiece(
-        path: Path,
-        xCoord: Int,
-        pieceWidth: Int,
-        yCoord: Int
-    ) {
-        path.lineTo(xCoord.toFloat() + pieceWidth, yCoord.toFloat())
-    }
-
-    private fun isScreenOrientationPortrait(): Boolean {
+    fun isScreenOrientationPortrait(): Boolean {
         return when (resources.configuration.orientation) {
             Configuration.ORIENTATION_PORTRAIT -> true
             else -> false
@@ -237,14 +321,18 @@ class PuzzlePathView @JvmOverloads constructor(
     }
 
     companion object {
+
         const val numberForCalculateColumnsAndRowsByDefault: Int = 4
         const val bigSideOfPuzzlePathView = 4
         const val smallSideOfPuzzlePathView = 3
-        const val twoPartsOfWhole = 2
-        const val threePartsOfWhole = 3
-        const val fourPartsOfWhole = 4
-        const val fivePartsOfWhole = 5
-        const val sixPartsOfWhole = 6
+        const val two = 2
+        const val three = 3
+        const val four = 4
+        const val five = 5
+        const val six = 6
+        const val rightAngles = 0
+        const val notRightAngles = 1
+
     }
 
 

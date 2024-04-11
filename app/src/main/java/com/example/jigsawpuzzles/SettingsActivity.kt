@@ -27,6 +27,7 @@ import kotlin.random.Random
 class SettingsActivity : AppCompatActivity(), OnTouchListener {
     private lateinit var binding: ActivitySettingsBinding
     private var isScreenOrientationPortrait by Delegates.notNull<Boolean>()
+    private var selectedMenuItem:Int? = null
     private var pieces: ArrayList<PuzzlePiece>? = null
     private var imageViewWidth: Int? = null
     private var imageViewHeight: Int? = null
@@ -57,6 +58,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
         isScreenOrientationPortrait = ResourcesUtils(this).isScreenOrientationPortrait()
 
+
         if (isScreenOrientationPortrait) {
             getPortraitTargetDimensions(screenWidth)
         } else {
@@ -68,6 +70,16 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
             onButtonBackPuzzleClick()
         }
         binding.puzzlePathView.bringToFront()
+
+        val selectedRightAnglesMenuItem = R.id.submenu_item1
+
+        selectedMenuItem = intent.getIntExtra("selectedMenuItem", selectedRightAnglesMenuItem)
+
+        if (selectedMenuItem == selectedRightAnglesMenuItem) {
+            binding.puzzlePathView.linesType = rightAnglesLinesType
+        } else {
+            binding.puzzlePathView.linesType = notRightAnglesLinesType
+        }
 
         binding.seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
 
@@ -155,7 +167,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
     override fun onDestroy() {
         super.onDestroy()
-       GameSounds(this).stopMediaPlayer()
+        GameSounds(this).stopMediaPlayer()
     }
 
 
@@ -262,7 +274,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
     private fun randomizePiecePositionOnRightOfScreen(
         lParams: RelativeLayout.LayoutParams,
-        piece: PuzzlePiece
+        piece: PuzzlePiece,
     ) {
         lParams.topMargin = Random.nextInt(binding.containerLayout.height - piece.pieceHeight)
         lParams.leftMargin = binding.containerLayout.width - piece.pieceWidth
@@ -271,7 +283,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
     private fun randomizePiecePositionOnBottomOfScreen(
         lParams: RelativeLayout.LayoutParams,
-        piece: PuzzlePiece
+        piece: PuzzlePiece,
     ) {
         lParams.leftMargin = Random.nextInt(binding.containerLayout.width - piece.pieceWidth)
         lParams.topMargin = binding.containerLayout.height - piece.pieceHeight
@@ -318,7 +330,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
     private fun isPieceCloseEnoughToItsPlace(
         tolerance: Double,
         xDiff: Int,
-        yDiff: Int
+        yDiff: Int,
     ) = xDiff <= tolerance && yDiff <= tolerance
 
     private fun getPermissibleDeviationOfCoordinates(view: View?) =
@@ -328,7 +340,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
     private fun setPieceInItsPlace(
         lParams: RelativeLayout.LayoutParams,
-        piece: PuzzlePiece
+        piece: PuzzlePiece,
     ) {
         lParams.leftMargin = piece.xCoord
         lParams.topMargin = piece.yCoord
@@ -343,6 +355,8 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
     }
 
     companion object {
+        const val rightAnglesLinesType = 0
+        const val notRightAnglesLinesType = 1
         const val bigSideOfImageView = 4
         const val smallSideOfImageView = 3
         const val oneHundredPercent = 100

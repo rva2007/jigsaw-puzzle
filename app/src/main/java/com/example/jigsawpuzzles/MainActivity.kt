@@ -1,7 +1,9 @@
 package com.example.jigsawpuzzles
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
@@ -31,6 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.IOException
+import java.util.*
 
 
 // This app used photos by Andrey Pavlov (known on the Internet by the nickname Antrey)
@@ -40,6 +43,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var bitmap: Bitmap
     private var latestTmpUri: Uri? = null
+    private var mSettings: SharedPreferences? = null
+    private var selected = defaultValue
+    private var menuItem: MenuItem? = null
+
 
     private val selectImageFromGalleryResult =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -51,9 +58,9 @@ class MainActivity : AppCompatActivity() {
                             Glide.with(applicationContext).asBitmap().load("$uri").submit().get()
                     }
                 }
-
                 val intent = Intent(applicationContext, SettingsActivity::class.java)
                 intent.putExtra("orientation", screenOrientation())
+                intent.putExtra("selectedMenuItem", selected)
                 intent.putExtra("gallery", uri.toString())
                 startActivity(intent)
                 bitmap.recycle()
@@ -74,6 +81,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     val intent = Intent(applicationContext, SettingsActivity::class.java)
                     intent.putExtra("orientation", screenOrientation())
+                    intent.putExtra("selectedMenuItem", selected)
                     intent.putExtra("camera", uri.toString())
                     startActivity(intent)
                     bitmap.recycle()
@@ -101,17 +109,47 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
+
+        if (selected == defaultValue) {
+            return true
+        }
+
+        when (selected) {
+            R.id.submenu_item1 -> {
+                menuItem = menu!!.findItem(R.id.submenu_item1) as MenuItem
+                menuItem!!.isChecked = true
+            }
+            R.id.submenu_item2 -> {
+                menuItem = menu!!.findItem(R.id.submenu_item2) as MenuItem
+                menuItem!!.isChecked = true
+            }
+        }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.about_application -> AlertDialogDemonstrator(this).showAboutAppAlertDialog()
+        val id = item.itemId
+
+        when (id) {
+            R.id.submenu_item1 -> {
+                selected = id
+                item.isChecked = true
+                return true
+            }
+            R.id.submenu_item2 -> {
+                selected = id
+                item.isChecked = true
+                return true
+            }
+            R.id.about_application -> {
+                AlertDialogDemonstrator(this).showAboutAppAlertDialog()
+                return true
+            }
+
         }
-        return true
+        return super.onOptionsItemSelected(item)
     }
 
     @RequiresApi(34)
@@ -120,6 +158,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+
+        if (mSettings != null) {
+            selected = mSettings!!.getInt(MENU_SELECTED, defaultValue)
+        }
 
         registerPermissionListener()
 
@@ -133,6 +177,13 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+    }
+
+    override fun onPause() {
+        val editor: SharedPreferences.Editor = mSettings!!.edit()
+        editor.putInt(MENU_SELECTED, selected)
+        editor.apply()
+        super.onPause()
     }
 
     @RequiresApi(34)
@@ -182,7 +233,8 @@ class MainActivity : AppCompatActivity() {
             deleteOnExit()
         }
         return FileProvider.getUriForFile(
-            applicationContext, "${BuildConfig.APPLICATION_ID}.provider", tmpFile
+            Objects.requireNonNull(getApplicationContext()),
+            BuildConfig.APPLICATION_ID + ".provider", tmpFile
         )
     }
 
@@ -309,6 +361,7 @@ class MainActivity : AppCompatActivity() {
 
                 val intent = Intent(applicationContext, SettingsActivity::class.java)
                 intent.putExtra("orientation", screenOrientation())
+                intent.putExtra("selectedMenuItem", selected)
                 intent.putExtra("assets", uri.toString())
                 startActivity(intent)
                 bitmap.recycle()
@@ -321,5 +374,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun screenOrientation() = if (bitmap.width > bitmap.height) "landscape" else "portrait"
+
+    companion object{
+        const val defaultValue = R.id.submenu_item1
+        const val APP_PREFERENCES = "mysettings"
+        const val MENU_SELECTED = "selected"
+    }
 
 }

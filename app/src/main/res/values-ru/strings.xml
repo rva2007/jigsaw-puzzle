@@ -28,5 +28,7 @@
     <string name="cancel">ОТМЕНА</string>
     <string name="message_for_rationale_for_camera">Чтобы использовать камеру, вам необходимо дать разрешение
         на съемку и запись видео</string>
-
+    <string name="shape_of_puzzles">Форма пазлов</string>
+    <string name="shape_of_puzzles_submenu_item1">Прямые углы</string>
+    <string name="shape_of_puzzles_submenu_item2">Непрямые углы</string>
 </resources>

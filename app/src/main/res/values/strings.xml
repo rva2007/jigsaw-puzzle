@@ -27,4 +27,7 @@
     <string name="go_to_permissions">GO TO PERMISSIONS</string>
     <string name="cancel">CANCEL</string>
     <string name="message_for_rationale_for_camera">To use the camera, you need your permission to take pictures and record video</string>
+    <string name="shape_of_puzzles">Shape of puzzles</string>
+    <string name="shape_of_puzzles_submenu_item1">Right angles</string>
+    <string name="shape_of_puzzles_submenu_item2">Not right angles</string>
 </resources>
