@@ -4,8 +4,11 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.widget.ImageView
+import com.example.jigsawpuzzles.extentions.NotRightAnglesPath
+import com.example.jigsawpuzzles.extentions.PuzzlePathView
+import com.example.jigsawpuzzles.extentions.RightAnglesPath
 
-class ImageSplitter(context: Context) {
+class ImageSplitter(context: Context, private var linesType: Int) {
     private val _context = context
 
     fun getListOfPuzzles(
@@ -30,7 +33,7 @@ class ImageSplitter(context: Context) {
         val drawable = imageView.drawable as BitmapDrawable
         val bitmap = drawable.bitmap
 
-         //calculate the width and the height of the pieces
+        //calculate the width and the height of the pieces
         val pieceWidth = (imageView.width / columns) - compensationValue
         val pieceHeight = (imageView.height / rows) - compensationValue
 
@@ -42,62 +45,105 @@ class ImageSplitter(context: Context) {
                 //calculate offset for each piece
                 var offsetX = 0
                 var offsetY = 0
-                if (column > 0) {
-                    offsetX = pieceWidth / threePartsOfWhole
-                }
-                if (row > 0) {
-                    offsetY = pieceHeight / threePartsOfWhole
-                }
+
+                val bumpSize = pieceHeight / fourPartsOfWhole
+
+                var bitmapWidth = pieceWidth
+                var bitmapHeight = pieceHeight
+
+
+                val pair = setBitmapWidthAndOffsetX(
+                    column,
+                    bitmapWidth,
+                    pieceWidth,
+                    bumpSize,
+                    offsetX,
+                    columns
+                )
+                bitmapWidth = pair.first
+                offsetX = pair.second
+
+
+                val pair1 = setBitmapHeightAndOffsetY(
+                    row,
+                    bitmapHeight,
+                    pieceHeight,
+                    bumpSize,
+                    offsetY,
+                    rows
+                )
+                bitmapHeight = pair1.first
+                offsetY = pair1.second
+
+                //bitmap для отрисовки Path и картинки-подложки
                 val pieceBitmap = Bitmap.createBitmap(
                     bitmap,
-                    xCoord - offsetX,
-                    yCoord - offsetY,
-                    pieceWidth + offsetX,
-                    pieceHeight + offsetY
+                    xCoord - offsetX,                      // координаты Х подложки
+                    yCoord - offsetY,                     // координата Y подложки
+                    bitmapWidth,   // ширина картинки подложки
+                    bitmapHeight   // высота картинки подложки
                 )
+
                 val piece = PuzzlePiece(_context)
                 piece.setImageBitmap(pieceBitmap)
                 piece.xCoord = xCoord - offsetX + imageView.left
                 piece.yCoord = yCoord - offsetY + imageView.top
                 piece.pieceWidth = pieceWidth + offsetX
                 piece.pieceHeight = pieceHeight + offsetY
+
                 //this bitmap will hold our final puzzle piece image
                 val puzzlePiece = Bitmap.createBitmap(
-                    pieceWidth + offsetX, pieceHeight + offsetY, Bitmap.Config.ARGB_8888
+                    pieceWidth + offsetX + bumpSize, //ширина картинки подложки
+                    pieceHeight + offsetY + bumpSize, //высота картинки подложки
+                    Bitmap.Config.ARGB_8888
                 )
-//                //draw path
-                val bumpSize = pieceHeight / fourPartsOfWhole
+
+                //draw path
                 val canvas = Canvas(puzzlePiece)
                 val path = Path()
                 path.moveTo(offsetX.toFloat(), offsetY.toFloat())
-
                 if (row == 0) {
                     //top piece side
-                    drawTopPieceSide(path, pieceBitmap, offsetY)
+                    drawTopSideOfPiece(path, offsetX, pieceWidth, offsetY)
+                } else if (row % 2 != 0) {
+                    //top cave
+                    drawTopCave(path, offsetX, pieceWidth, offsetY, pieceHeight, bumpSize)
                 } else {
                     //top bump
-                    drawTopBump(path, offsetX, pieceBitmap, offsetY, bumpSize)
+                    drawTopBump(path, offsetX, pieceWidth, offsetY, pieceHeight, bumpSize)
                 }
+
                 if (column == columns - 1) {
                     //right piece side
-                    drawRightPieceSide(path, pieceBitmap)
+                    drawRightSideOfPiece(path, offsetX, pieceWidth, offsetY, pieceHeight)
+                } else if (column % 2 != 0) {
+                    //right cave
+                    drawRightCave(path, offsetX, pieceWidth, offsetY, pieceHeight)
                 } else {
                     //right bump
-                    drawRightBump(path, pieceBitmap, offsetY, bumpSize)
+                    drawRightBump(path, offsetX, pieceWidth, offsetY, pieceHeight, bumpSize)
                 }
+
                 if (row == rows - 1) {
                     //bottom piece side
-                    drawBottomPieceSide(path, offsetX, pieceBitmap)
+                    drawBottomSideOfPiece(path, offsetX, pieceHeight, offsetY)
+                } else if (row % 2 != 0) {
+                    //bottom cave
+                    drawBottomCave(path, pieceWidth, offsetX, pieceHeight, offsetY, bumpSize)
                 } else {
                     //bottom bump
-                    drawBottomBump(path, offsetX, pieceBitmap, bumpSize)
+                    drawBottomBump(path, offsetX, pieceWidth, offsetY, pieceHeight, bumpSize)
                 }
+
                 if (column == 0) {
                     //left piece side
-                    path.close()
+                    drawLeftSideOfPiece(path)
+                } else if (column % 2 != 0) {
+                    //left cave
+                    drawLeftCave(path, offsetX, pieceWidth, offsetY, pieceHeight, bumpSize)
                 } else {
                     //left bump
-                    drawLeftBump(path, offsetX, offsetY, pieceBitmap, bumpSize)
+                    drawLeftBump(path, pieceWidth, offsetX, pieceHeight, offsetY, bumpSize)
                 }
 
                 //mask the piece
@@ -113,6 +159,371 @@ class ImageSplitter(context: Context) {
             yCoord += pieceHeight
         }
         return pieces
+    }
+
+    private fun drawLeftBump(
+        path: Path,
+        pieceWidth: Int,
+        offsetX: Int,
+        pieceHeight: Int,
+        offsetY: Int,
+        bumpSize: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawLeftBump(
+                    path,
+                    pieceWidth,
+                    offsetX,
+                    pieceHeight,
+                    offsetY,
+                    bumpSize
+                )
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawLeftBump(
+                    path,
+                    pieceWidth,
+                    offsetX,
+                    pieceHeight,
+                    offsetY,
+                    bumpSize
+                )
+            }
+        }
+    }
+
+    private fun drawLeftCave(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawLeftCave(
+                    path,
+                    offsetX,
+                    pieceWidth,
+                    offsetY,
+                    pieceHeight,
+                    bumpSize
+                )
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawLeftCave(
+                    path,
+                    offsetX,
+                    pieceWidth,
+                    offsetY,
+                    pieceHeight,
+                    bumpSize
+                )
+            }
+        }
+    }
+
+    private fun drawLeftSideOfPiece(path: Path) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawLeftSideOfPiece(path)
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawLeftSideOfPiece(path)
+            }
+        }
+    }
+
+    private fun drawBottomBump(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawBottomBump(
+                    path,
+                    offsetX,
+                    pieceWidth,
+                    offsetY,
+                    pieceHeight,
+                    bumpSize
+                )
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawBottomBump(
+                    path,
+                    offsetX,
+                    pieceWidth,
+                    offsetY,
+                    pieceHeight,
+                    bumpSize
+                )
+            }
+        }
+    }
+
+    private fun drawBottomCave(
+        path: Path,
+        pieceWidth: Int,
+        offsetX: Int,
+        pieceHeight: Int,
+        offsetY: Int,
+        bumpSize: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawBottomCave(
+                    path,
+                    pieceWidth,
+                    offsetX,
+                    pieceHeight,
+                    offsetY,
+                    bumpSize
+                )
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawBottomCave(
+                    path,
+                    pieceWidth,
+                    offsetX,
+                    pieceHeight,
+                    offsetY,
+                    bumpSize
+                )
+            }
+        }
+    }
+
+    private fun drawBottomSideOfPiece(
+        path: Path,
+        offsetX: Int,
+        pieceHeight: Int,
+        offsetY: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawBottomSideOfPiece(
+                    path, offsetX, pieceHeight, offsetY
+                )
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawBottomSideOfPiece(
+                    path, offsetX, pieceHeight, offsetY
+                )
+            }
+        }
+    }
+
+    private fun drawRightBump(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawRightBump(
+                    path,
+                    offsetX,
+                    pieceWidth,
+                    offsetY,
+                    pieceHeight,
+                    bumpSize
+                )
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawRightBump(
+                    path,
+                    offsetX,
+                    pieceWidth,
+                    offsetY,
+                    pieceHeight,
+                    bumpSize
+                )
+            }
+        }
+    }
+
+    private fun drawRightCave(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawRightCave(
+                    path, offsetX, pieceWidth, offsetY, pieceHeight
+                )
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawRightCave(
+                    path, offsetX, pieceWidth, offsetY, pieceHeight
+                )
+            }
+        }
+    }
+
+    private fun drawRightSideOfPiece(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawRightSideOfPiece(
+                    path,
+                    offsetX,
+                    pieceWidth,
+                    offsetY,
+                    pieceHeight
+                )
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawRightSideOfPiece(
+                    path,
+                    offsetX,
+                    pieceWidth,
+                    offsetY,
+                    pieceHeight
+                )
+            }
+        }
+    }
+
+    private fun drawTopBump(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawTopBump(
+                    path, offsetX, pieceWidth, offsetY, pieceHeight, bumpSize
+                )
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawTopBump(
+                    path, offsetX, pieceWidth, offsetY, pieceHeight, bumpSize
+                )
+            }
+        }
+    }
+
+    private fun drawTopCave(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawTopCave(
+                    path, offsetX, pieceWidth, offsetY, pieceHeight, bumpSize
+                )
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawTopCave(
+                    path, offsetX, pieceWidth, offsetY, pieceHeight, bumpSize
+                )
+            }
+        }
+    }
+
+    private fun drawTopSideOfPiece(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+    ) {
+        when (linesType) {
+            PuzzlePathView.rightAnglesCode -> {
+                RightAnglesPath().drawTopSideOfPiece(path, offsetX, pieceWidth, offsetY)
+            }
+            PuzzlePathView.notRightAnglesCode -> {
+                NotRightAnglesPath().drawTopSideOfPiece(
+                    path,
+                    offsetX,
+                    pieceWidth,
+                    offsetY
+                )
+            }
+
+        }
+    }
+
+    private fun setBitmapHeightAndOffsetY(
+        row: Int,
+        bitmapHeight: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+        offsetY: Int,
+        rows: Int,
+    ): Pair<Int, Int> {
+        var bitmapHeight1 = bitmapHeight
+        var offsetY1 = offsetY
+        if (row == 0) {
+            bitmapHeight1 = pieceHeight + bumpSize
+            offsetY1 = 0
+        } else if (row % 2 == 0 && row != rows - 1) {
+            bitmapHeight1 = pieceHeight + bumpSize + bumpSize
+            offsetY1 = bumpSize
+        } else if (row % 2 != 0 && row != rows - 1) {
+            bitmapHeight1 = pieceHeight + bumpSize + bumpSize
+            offsetY1 = bumpSize
+        } else if (row % 2 == 0 && row == rows - 1) {
+            bitmapHeight1 = pieceHeight + bumpSize
+            offsetY1 = bumpSize
+        } else {
+            bitmapHeight1 = pieceHeight + bumpSize
+            offsetY1 = bumpSize
+        }
+        return Pair(bitmapHeight1, offsetY1)
+    }
+
+    private fun setBitmapWidthAndOffsetX(
+        column: Int,
+        bitmapWidth: Int,
+        pieceWidth: Int,
+        bumpSize: Int,
+        offsetX: Int,
+        columns: Int,
+    ): Pair<Int, Int> {
+        var bitmapWidth1 = bitmapWidth
+        var offsetX1 = offsetX
+        if (column == 0) {
+            bitmapWidth1 = pieceWidth + bumpSize
+            offsetX1 = 0
+        } else if (column % 2 == 0 && column != columns - 1) {
+            bitmapWidth1 = pieceWidth + bumpSize + bumpSize
+            offsetX1 = bumpSize
+        } else if (column % 2 == 0 && column == columns - 1) {
+            bitmapWidth1 = pieceWidth + bumpSize
+            offsetX1 = bumpSize
+        } else if (column % 2 != 0 && column == columns - 1) {
+            bitmapWidth1 = pieceWidth + bumpSize
+            offsetX1 = bumpSize
+        } else {
+            bitmapWidth1 = pieceWidth + bumpSize + bumpSize
+            offsetX1 = bumpSize
+        }
+        return Pair(bitmapWidth1, offsetX1)
     }
 
     private fun drawBorders(canvas: Canvas, path: Path) {
@@ -149,133 +560,9 @@ class ImageSplitter(context: Context) {
         canvas.drawBitmap(pieceBitmap, 0f, 0f, paint)
     }
 
-    private fun drawTopBump(
-        path: Path,
-        offsetX: Int,
-        pieceBitmap: Bitmap,
-        offsetY: Int,
-        bumpSize: Int
-    ) {
-        path.lineTo(
-            (offsetX + (pieceBitmap.width - offsetX) / threePartsOfWhole).toFloat(),
-            offsetY.toFloat()
-        )
-        path.cubicTo(
-            ((offsetX + (pieceBitmap.width - offsetX) / sixPartsOfWhole).toFloat()),
-            (offsetY - bumpSize).toFloat(),
-            ((offsetX + (pieceBitmap.width - offsetX) / sixPartsOfWhole * fivePartsOfWhole)).toFloat(),
-            (offsetY - bumpSize).toFloat(),
-            (offsetX + (pieceBitmap.width - offsetX) / threePartsOfWhole * twoPartsOfWhole).toFloat(),
-            offsetY.toFloat()
-        )
-        path.lineTo(pieceBitmap.width.toFloat(), offsetY.toFloat())
-    }
-
-    private fun drawBottomBump(
-        path: Path,
-        offsetX: Int,
-        pieceBitmap: Bitmap,
-        bumpSize: Int
-    ) {
-        path.lineTo(
-            (offsetX + (pieceBitmap.width - offsetX) / threePartsOfWhole * twoPartsOfWhole).toFloat(),
-            pieceBitmap.height.toFloat()
-        )
-        path.cubicTo(
-            (offsetX + (pieceBitmap.width - offsetX) / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
-            (pieceBitmap.height - bumpSize).toFloat(),
-            (offsetX + (pieceBitmap.width - offsetX) / sixPartsOfWhole).toFloat(),
-            (pieceBitmap.height - bumpSize).toFloat(),
-            (offsetX + (pieceBitmap.width - offsetX) / threePartsOfWhole).toFloat(),
-            pieceBitmap.height.toFloat()
-        )
-        path.lineTo(
-            offsetX.toFloat(),
-            pieceBitmap.height.toFloat()
-        )
-    }
-
-    private fun drawLeftBump(
-        path: Path,
-        offsetX: Int,
-        offsetY: Int,
-        pieceBitmap: Bitmap,
-        bumpSize: Int
-    ) {
-        path.lineTo(
-            offsetX.toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / threePartsOfWhole * twoPartsOfWhole).toFloat(),
-        )
-        path.cubicTo(
-            (offsetX - bumpSize).toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
-            (offsetX - bumpSize).toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / sixPartsOfWhole).toFloat(),
-            offsetX.toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / threePartsOfWhole).toFloat()
-        )
-        path.close()
-    }
-
-    private fun drawRightBump(
-        path: Path,
-        pieceBitmap: Bitmap,
-        offsetY: Int,
-        bumpSize: Int
-    ) {
-        path.lineTo(
-            pieceBitmap.width.toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / threePartsOfWhole).toFloat()
-        )
-        path.cubicTo(
-            (pieceBitmap.width - bumpSize).toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / sixPartsOfWhole).toFloat(),
-            (pieceBitmap.width - bumpSize).toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / sixPartsOfWhole * fivePartsOfWhole).toFloat(),
-            pieceBitmap.width.toFloat(),
-            (offsetY + (pieceBitmap.height - offsetY) / threePartsOfWhole * twoPartsOfWhole).toFloat()
-        )
-        path.lineTo(
-            pieceBitmap.width.toFloat(),
-            pieceBitmap.height.toFloat()
-        )
-    }
-
-    private fun drawTopPieceSide(
-        path: Path,
-        pieceBitmap: Bitmap,
-        offsetY: Int
-    ) {
-        path.lineTo(
-            pieceBitmap.width.toFloat(),
-            offsetY.toFloat()
-        )
-    }
-
-    private fun drawRightPieceSide(path: Path, pieceBitmap: Bitmap) {
-        path.lineTo(
-            pieceBitmap.width.toFloat(),
-            pieceBitmap.height.toFloat()
-        )
-    }
-
-    private fun drawBottomPieceSide(
-        path: Path,
-        offsetX: Int,
-        pieceBitmap: Bitmap
-    ) {
-        path.lineTo(
-            offsetX.toFloat(), pieceBitmap.height.toFloat()
-        )
-    }
-
     companion object {
         const val compensationValue = 2
-        const val twoPartsOfWhole = 2
-        const val threePartsOfWhole = 3
         const val fourPartsOfWhole = 4
-        const val fivePartsOfWhole = 5
-        const val sixPartsOfWhole = 6
     }
 
 }

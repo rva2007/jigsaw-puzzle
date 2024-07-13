@@ -2,7 +2,7 @@ package com.example.jigsawpuzzles.extentions
 
 import android.graphics.Path
 
-class NotRightAnglesPath:InterfacePuzzlePathView {
+class NotRightAnglesPath : InterfacePuzzlePathView {
     override fun createLeftBump(
         path: Path,
         xCoord: Int,
@@ -30,6 +30,37 @@ class NotRightAnglesPath:InterfacePuzzlePathView {
             (yCoord + pieceHeight / two).toFloat(),
             xCoord.toFloat(),
             yCoord.toFloat()
+        )
+
+    }
+
+    override fun drawLeftBump(
+        path: Path,
+        pieceWidth: Int,
+        offsetX: Int,
+        pieceHeight: Int,
+        offsetY: Int,
+        bumpSize: Int,
+    ) {
+        path.quadTo(
+            (offsetX + pieceWidth / ten * two).toFloat(),
+            (offsetY + pieceHeight / two).toFloat(),
+            offsetX.toFloat(),
+            (offsetY + pieceHeight / three * two).toFloat()
+        )
+        path.cubicTo(
+            (offsetX - bumpSize).toFloat(),
+            (offsetY + pieceHeight / six * five).toFloat(),
+            (offsetX - bumpSize).toFloat(),
+            (offsetY + (pieceHeight - offsetY) / six).toFloat(),
+            offsetX.toFloat(),
+            (offsetY + pieceHeight / three).toFloat()
+        )
+        path.quadTo(
+            (offsetX + pieceWidth / ten * two).toFloat(),
+            (offsetY + pieceHeight / two).toFloat(),
+            offsetX.toFloat(),
+            offsetY.toFloat()
         )
 
     }
@@ -64,6 +95,37 @@ class NotRightAnglesPath:InterfacePuzzlePathView {
         )
     }
 
+    override fun drawLeftCave(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+    ) {
+        path.quadTo(
+            (offsetX - pieceWidth / ten * two).toFloat(),
+            (offsetY + pieceHeight / two).toFloat(),
+            offsetX.toFloat(),
+            (offsetY + pieceHeight / three * two).toFloat(),
+        )
+        path.cubicTo(
+            (offsetX + bumpSize).toFloat(),
+            (offsetY + pieceHeight / six * five).toFloat(),
+            (offsetX + bumpSize).toFloat(),
+            (offsetY + (pieceHeight - offsetY) / six).toFloat(),
+            offsetX.toFloat(),
+            (offsetY + pieceHeight / three).toFloat()
+        )
+        path.quadTo(
+            (offsetX - pieceWidth / ten * two).toFloat(),
+            (offsetY + pieceHeight / two).toFloat(),
+            offsetX.toFloat(),
+            offsetY.toFloat()
+        )
+
+    }
+
     override fun createBottomCave(
         path: Path,
         xCoord: Int,
@@ -94,6 +156,37 @@ class NotRightAnglesPath:InterfacePuzzlePathView {
             xCoord.toFloat(),
             yCoord.toFloat() + pieceHeight.toFloat()
         )
+    }
+
+    override fun drawBottomCave(
+        path: Path,
+        pieceWidth: Int,
+        offsetX: Int,
+        pieceHeight: Int,
+        offsetY: Int,
+        bumpSize: Int,
+    ) {
+        path.quadTo(
+            (offsetX + pieceWidth - pieceWidth / two).toFloat(),
+            (offsetY + pieceHeight + pieceHeight / ten * two).toFloat(),
+            (offsetX + pieceWidth / three * two).toFloat(),
+            (offsetY + pieceHeight).toFloat()
+        )
+        path.cubicTo(
+            (offsetX + pieceWidth / six * five).toFloat(),
+            (offsetY + pieceHeight - bumpSize).toFloat(),
+            (offsetX + pieceWidth / six).toFloat(),
+            (offsetY + pieceHeight - bumpSize).toFloat(),
+            (offsetX + pieceWidth / three).toFloat(),
+            (offsetY + pieceHeight).toFloat()
+        )
+        path.quadTo(
+            (offsetX + pieceWidth / two).toFloat(),
+            (offsetY + pieceHeight + pieceHeight / ten * two).toFloat(),
+            offsetX.toFloat(),
+            (offsetY + pieceHeight).toFloat()
+        )
+
     }
 
     override fun createBottomBump(
@@ -128,10 +221,49 @@ class NotRightAnglesPath:InterfacePuzzlePathView {
         )
     }
 
+    override fun drawBottomBump(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+    ) {
+        path.quadTo(
+            (offsetX + pieceWidth - pieceWidth / two).toFloat(),
+            (offsetY + pieceHeight - pieceHeight / ten * two).toFloat(),
+            (offsetX + pieceWidth / three * two).toFloat(),
+            pieceHeight.toFloat() + offsetY
+        )
+        path.cubicTo(
+            (offsetX + offsetX + (pieceWidth - offsetX) / six * five).toFloat(),
+            (offsetY + pieceHeight + bumpSize).toFloat(),
+            (offsetX + (pieceWidth - offsetX) / six).toFloat(),
+            (offsetY + pieceHeight + bumpSize).toFloat(),
+            (offsetX + pieceWidth / three).toFloat(),
+            pieceHeight.toFloat() + offsetY
+        )
+        path.quadTo(
+            (offsetX + pieceWidth - pieceWidth / two).toFloat(),
+            (offsetY + pieceHeight - pieceHeight / ten * two).toFloat(),
+            offsetX.toFloat(),
+            (offsetY + pieceHeight).toFloat()
+        )
+
+    }
+
     override fun createBottomSideOfPiece(path: Path, xCoord: Int, yCoord: Int, pieceHeight: Int) {
         path.lineTo(
             xCoord.toFloat(), yCoord.toFloat() + pieceHeight.toFloat()
         )
+    }
+
+    override fun drawBottomSideOfPiece(path: Path, offsetX: Int, pieceHeight: Int, offsetY: Int) {
+        path.lineTo(
+            offsetX.toFloat(),
+            (offsetY + pieceHeight).toFloat()
+        )
+
     }
 
     override fun createRightBump(
@@ -164,6 +296,37 @@ class NotRightAnglesPath:InterfacePuzzlePathView {
         )
     }
 
+    override fun drawRightBump(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+    ) {
+        path.quadTo(
+            (offsetX + pieceWidth - pieceWidth / ten * two).toFloat(),
+            (offsetY + pieceHeight / two).toFloat(),
+            (offsetX + pieceWidth).toFloat(),
+            (offsetY + pieceHeight / three).toFloat()
+        )
+        path.cubicTo(
+            (offsetX + pieceWidth + bumpSize).toFloat(),
+            (offsetY + (pieceHeight - offsetY) / six).toFloat(),
+            (offsetX + pieceWidth + bumpSize).toFloat(),
+            (offsetY + pieceHeight / six * five).toFloat(),
+            (offsetX + pieceWidth).toFloat(),
+            (offsetY + pieceHeight / three * two).toFloat()
+        )
+        path.quadTo(
+            (offsetX + pieceWidth - pieceWidth / ten * two).toFloat(),
+            (offsetY + pieceHeight - pieceHeight / two).toFloat(),
+            (offsetX + pieceWidth).toFloat(),
+            (offsetY + pieceHeight).toFloat()
+        )
+
+    }
+
     override fun createRightCave(
         path: Path,
         xCoord: Int,
@@ -194,6 +357,36 @@ class NotRightAnglesPath:InterfacePuzzlePathView {
         )
     }
 
+    override fun drawRightCave(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+    ) {
+        path.quadTo(
+            (offsetX + pieceWidth + pieceWidth / ten * two).toFloat(),
+            (offsetY + pieceHeight / two).toFloat(),
+            (offsetX + pieceWidth).toFloat(),
+            (offsetY + pieceHeight / three).toFloat()
+        )
+        path.cubicTo(
+            pieceWidth.toFloat(),
+            (offsetY + (pieceHeight - offsetY) / six).toFloat(),
+            pieceWidth.toFloat(),
+            (offsetY + pieceHeight / six * five).toFloat(),
+            (offsetX + pieceWidth).toFloat(),
+            (offsetY + pieceHeight / three * two).toFloat()
+        )
+        path.quadTo(
+            (offsetX + pieceWidth + pieceWidth / ten * two).toFloat(),
+            (offsetY + pieceHeight - pieceHeight / two).toFloat(),
+            (offsetX + pieceWidth).toFloat(),
+            (offsetY + pieceHeight).toFloat()
+        )
+
+    }
+
     override fun createRightSideOfPiece(
         path: Path,
         xCoord: Int,
@@ -204,8 +397,25 @@ class NotRightAnglesPath:InterfacePuzzlePathView {
         path.lineTo(xCoord.toFloat() + pieceWidth, yCoord.toFloat() + pieceHeight)
     }
 
+    override fun drawRightSideOfPiece(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+    ) {
+        path.lineTo(
+            (offsetX + pieceWidth).toFloat(),
+            (offsetY + pieceHeight).toFloat()
+        )
+    }
+
     override fun createTopSideOfPiece(path: Path, xCoord: Int, pieceWidth: Int, yCoord: Int) {
         path.lineTo(xCoord.toFloat() + pieceWidth, yCoord.toFloat())
+    }
+
+    override fun drawTopSideOfPiece(path: Path, offsetX: Int, pieceWidth: Int, offsetY: Int) {
+        path.lineTo((offsetX + pieceWidth).toFloat(), offsetY.toFloat())
     }
 
     override fun createTopBump(
@@ -238,6 +448,37 @@ class NotRightAnglesPath:InterfacePuzzlePathView {
         )
     }
 
+    override fun drawTopBump(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+    ) {
+        path.quadTo(
+            (offsetX + pieceWidth / two).toFloat(),
+            (offsetY + pieceHeight / ten * two).toFloat(),
+            (offsetX + pieceWidth / three).toFloat(),
+            offsetY.toFloat()
+        )
+        path.cubicTo(
+            (offsetX + (pieceWidth - offsetX) / six).toFloat(),
+            (offsetY - bumpSize).toFloat(),
+            ((offsetX + pieceWidth / six * five)).toFloat(),
+            (offsetY - bumpSize).toFloat(),
+            (offsetX + pieceWidth / three * two).toFloat(),
+            offsetY.toFloat()
+        )
+        path.quadTo(
+            (offsetX + pieceWidth - pieceWidth / two).toFloat(),
+            (offsetY + pieceHeight / ten * two).toFloat(),
+            (offsetX + pieceWidth).toFloat(),
+            offsetY.toFloat()
+        )
+
+    }
+
     override fun createTopCave(
         path: Path,
         xCoord: Int,
@@ -268,6 +509,37 @@ class NotRightAnglesPath:InterfacePuzzlePathView {
         )
     }
 
+    override fun drawTopCave(
+        path: Path,
+        offsetX: Int,
+        pieceWidth: Int,
+        offsetY: Int,
+        pieceHeight: Int,
+        bumpSize: Int,
+    ) {
+        path.quadTo(
+            (offsetX + pieceWidth / two).toFloat(),
+            (offsetY - pieceHeight / ten * two).toFloat(),
+            (offsetX + pieceWidth / three).toFloat(),
+            offsetY.toFloat()
+        )
+        path.cubicTo(
+            (offsetX + (pieceWidth - offsetX) / six).toFloat(),
+            (offsetY + bumpSize).toFloat(),
+            (offsetX + offsetX + (pieceWidth - offsetX) / six * five).toFloat(),
+            (offsetY + bumpSize).toFloat(),
+            (offsetX + pieceWidth / three * two).toFloat(),
+            offsetY.toFloat()
+        )
+        path.quadTo(
+            (offsetX + pieceWidth / two).toFloat(),
+            (offsetY - pieceHeight / ten * two).toFloat(),
+            (offsetX + pieceWidth).toFloat(),
+            offsetY.toFloat()
+        )
+
+    }
+
     override fun createLeftSideOfPiece(
         path: Path,
         xCoord: Int,
@@ -278,7 +550,11 @@ class NotRightAnglesPath:InterfacePuzzlePathView {
         path.close()
     }
 
-    companion object{
+    override fun drawLeftSideOfPiece(path: Path) {
+        path.close()
+    }
+
+    companion object {
         const val two = 2
         const val three = 3
         const val five = 5

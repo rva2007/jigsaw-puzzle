@@ -26,8 +26,9 @@ import kotlin.random.Random
 
 class SettingsActivity : AppCompatActivity(), OnTouchListener {
     private lateinit var binding: ActivitySettingsBinding
+    var linesType = rightAnglesLinesType
     private var isScreenOrientationPortrait by Delegates.notNull<Boolean>()
-    private var selectedMenuItem:Int? = null
+    protected var selectedMenuItem:Int? = null
     private var pieces: ArrayList<PuzzlePiece>? = null
     private var imageViewWidth: Int? = null
     private var imageViewHeight: Int? = null
@@ -77,8 +78,10 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
 
         if (selectedMenuItem == selectedRightAnglesMenuItem) {
             binding.puzzlePathView.linesType = rightAnglesLinesType
+            linesType = rightAnglesLinesType
         } else {
             binding.puzzlePathView.linesType = notRightAnglesLinesType
+            linesType = notRightAnglesLinesType
         }
 
         binding.seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
@@ -215,7 +218,7 @@ class SettingsActivity : AppCompatActivity(), OnTouchListener {
         binding.buttonContinue.isVisible = false
         binding.battonBackPuzzle.isVisible = true
 
-        pieces = ImageSplitter(this).getListOfPuzzles(
+        pieces = ImageSplitter(this, linesType ).getListOfPuzzles(
             binding.settingsImageView,
             columns!!,
             bigSideOfImageView,

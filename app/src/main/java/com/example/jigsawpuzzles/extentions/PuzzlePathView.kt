@@ -15,7 +15,7 @@ class PuzzlePathView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : AppCompatImageView(context, attrs, defStyleAttr) {
 
-    var linesType:Int = rightAngles
+    var linesType:Int = rightAnglesCode
 
     var num: Int = numberForCalculateColumnsAndRowsByDefault
     private var paint: Paint = Paint().apply {
@@ -74,13 +74,13 @@ class PuzzlePathView @JvmOverloads constructor(
                 if (row == 0) {
                     //top piece side
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createTopSideOfPiece(
+                        rightAnglesCode -> RightAnglesPath().createTopSideOfPiece(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
                             yCoord
                         )
-                        notRightAngles -> NotRightAnglesPath().createTopSideOfPiece(
+                        notRightAnglesCode -> NotRightAnglesPath().createTopSideOfPiece(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -90,7 +90,7 @@ class PuzzlePathView @JvmOverloads constructor(
                 } else if (row % 2 != 0) {
                     //top cave
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createTopCave(
+                        rightAnglesCode -> RightAnglesPath().createTopCave(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -98,7 +98,7 @@ class PuzzlePathView @JvmOverloads constructor(
                             pieceHeight,
                             bumpSize
                         )
-                        notRightAngles -> NotRightAnglesPath().createTopCave(
+                        notRightAnglesCode -> NotRightAnglesPath().createTopCave(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -110,7 +110,7 @@ class PuzzlePathView @JvmOverloads constructor(
                 } else {
                     //top bump
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createTopBump(
+                        rightAnglesCode -> RightAnglesPath().createTopBump(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -118,7 +118,7 @@ class PuzzlePathView @JvmOverloads constructor(
                             pieceHeight,
                             bumpSize
                         )
-                        notRightAngles -> NotRightAnglesPath().createTopBump(
+                        notRightAnglesCode -> NotRightAnglesPath().createTopBump(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -131,14 +131,14 @@ class PuzzlePathView @JvmOverloads constructor(
                 if (column == columns - 1) {
                     //right piece side
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createRightSideOfPiece(
+                        rightAnglesCode -> RightAnglesPath().createRightSideOfPiece(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
                             yCoord,
                             pieceHeight
                         )
-                        notRightAngles -> NotRightAnglesPath().createRightSideOfPiece(
+                        notRightAnglesCode -> NotRightAnglesPath().createRightSideOfPiece(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -149,7 +149,7 @@ class PuzzlePathView @JvmOverloads constructor(
                 } else if (column % 2 != 0) {
                     //right cave
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createRightCave(
+                        rightAnglesCode -> RightAnglesPath().createRightCave(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -157,7 +157,7 @@ class PuzzlePathView @JvmOverloads constructor(
                             pieceHeight,
                             bumpSize
                         )
-                        notRightAngles -> NotRightAnglesPath().createRightCave(
+                        notRightAnglesCode -> NotRightAnglesPath().createRightCave(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -169,7 +169,7 @@ class PuzzlePathView @JvmOverloads constructor(
                 } else {
                     //right bump
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createRightBump(
+                        rightAnglesCode -> RightAnglesPath().createRightBump(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -177,7 +177,7 @@ class PuzzlePathView @JvmOverloads constructor(
                             pieceHeight,
                             bumpSize
                         )
-                        notRightAngles -> NotRightAnglesPath().createRightBump(
+                        notRightAnglesCode -> NotRightAnglesPath().createRightBump(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -190,13 +190,13 @@ class PuzzlePathView @JvmOverloads constructor(
                 if (row == rows - 1) {
                     //bottom piece side
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createBottomSideOfPiece(
+                        rightAnglesCode -> RightAnglesPath().createBottomSideOfPiece(
                             pathOfPiece,
                             xCoord,
                             yCoord,
                             pieceHeight
                         )
-                        notRightAngles -> NotRightAnglesPath().createBottomSideOfPiece(
+                        notRightAnglesCode -> NotRightAnglesPath().createBottomSideOfPiece(
                             pathOfPiece,
                             xCoord,
                             yCoord,
@@ -206,7 +206,7 @@ class PuzzlePathView @JvmOverloads constructor(
                 } else if (row % 2 != 0) {
                     //bottom cave
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createBottomCave(
+                        rightAnglesCode -> RightAnglesPath().createBottomCave(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -214,7 +214,7 @@ class PuzzlePathView @JvmOverloads constructor(
                             pieceHeight,
                             bumpSize
                         )
-                        notRightAngles -> NotRightAnglesPath().createBottomCave(
+                        notRightAnglesCode -> NotRightAnglesPath().createBottomCave(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -226,7 +226,7 @@ class PuzzlePathView @JvmOverloads constructor(
                 } else {
                     //bottom bump
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createBottomBump(
+                        rightAnglesCode -> RightAnglesPath().createBottomBump(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -234,7 +234,7 @@ class PuzzlePathView @JvmOverloads constructor(
                             pieceHeight,
                             bumpSize
                         )
-                        notRightAngles -> NotRightAnglesPath().createBottomBump(
+                        notRightAnglesCode -> NotRightAnglesPath().createBottomBump(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -247,14 +247,14 @@ class PuzzlePathView @JvmOverloads constructor(
                 if (column == 0) {
                     //left piece side
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createLeftSideOfPiece(
+                        rightAnglesCode -> RightAnglesPath().createLeftSideOfPiece(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
                             yCoord,
                             pieceHeight
                         )
-                        notRightAngles -> NotRightAnglesPath().createLeftSideOfPiece(
+                        notRightAnglesCode -> NotRightAnglesPath().createLeftSideOfPiece(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -265,7 +265,7 @@ class PuzzlePathView @JvmOverloads constructor(
                 } else if (column % 2 != 0) {
                     //left cave
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createLeftCave(
+                        rightAnglesCode -> RightAnglesPath().createLeftCave(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -273,7 +273,7 @@ class PuzzlePathView @JvmOverloads constructor(
                             pieceHeight,
                             bumpSize
                         )
-                        notRightAngles -> NotRightAnglesPath().createLeftCave(
+                        notRightAnglesCode -> NotRightAnglesPath().createLeftCave(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -285,7 +285,7 @@ class PuzzlePathView @JvmOverloads constructor(
                 } else {
                     //left bump
                     when (linesType) {
-                        rightAngles -> RightAnglesPath().createLeftBump(
+                        rightAnglesCode -> RightAnglesPath().createLeftBump(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -293,7 +293,7 @@ class PuzzlePathView @JvmOverloads constructor(
                             pieceHeight,
                             bumpSize
                         )
-                        notRightAngles -> NotRightAnglesPath().createLeftBump(
+                        notRightAnglesCode -> NotRightAnglesPath().createLeftBump(
                             pathOfPiece,
                             xCoord,
                             pieceWidth,
@@ -330,8 +330,8 @@ class PuzzlePathView @JvmOverloads constructor(
         const val four = 4
         const val five = 5
         const val six = 6
-        const val rightAngles = 0
-        const val notRightAngles = 1
+        const val rightAnglesCode = 0
+        const val notRightAnglesCode = 1
 
     }
 
