@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jigsaw puzzles</string>
+    <string name="title">Jigsaw puzzles</string>
+    <string name="camera_button">camera button</string>
+    <string name="gallery_button">gallery button</string>
+    <string name="continue_button">Continue</string>
+    <string name="you_won_title">Good job!!!</string>
+    <string name="you_won_message">The picture is assembled!</string>
+    <string name="you_won_question">Do you want to assemble another one?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="complexity_text">Number of puzzles</string>
+    <string name="image_on_settings_screen">image on settings screen</string>
+    <string name="get_wrong_puzzles_back">get wrong puzzles back</string>
+    <string name="picture">picture</string>
+    <string name="confirmation">Confirmation</string>
+    <string name="are_you_sure">Are you sure you want to exit?</string>
+    <string name="about_application">About the application</string>
+    <string name="close">close</string>
+    <string name="authors">This app was created by Roman Rogachev and Vladimir Rogachev.\n\n
+        The app used photos by Andrey Pavlov
+        (known on the Internet by the nickname Antrey)</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="message_for_rationale_for_gallery">To use the gallery, you need your permission to access photos
+        and media on your device</string>
+    <string name="go_to_permissions">GO TO PERMISSIONS</string>
+    <string name="cancel">CANCEL</string>
+    <string name="message_for_rationale_for_camera">To use the camera, you need your permission to take pictures and record video</string>
+    <string name="shape_of_puzzles">Shape of puzzles</string>
+    <string name="shape_of_puzzles_submenu_item1">Right angles</string>
+    <string name="shape_of_puzzles_submenu_item2">Not right angles</string>
+</resources>

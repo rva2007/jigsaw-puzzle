@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Игра пазлы</string>
+    <string name="title">Игра пазлы</string>
+    <string name="camera_button">кнопка камеры</string>
+    <string name="gallery_button">кнопка галереи</string>
+    <string name="continue_button">Продолжить</string>
+    <string name="you_won_title">Хорошая работа!!!</string>
+    <string name="you_won_message">Картинка собрана!</string>
+    <string name="you_won_question">Хотите собрать еще одну?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="complexity_text">Количество пазлов</string>
+    <string name="image_on_settings_screen">картинка на экране настроек</string>
+    <string name="get_wrong_puzzles_back">вернуть неверно установленные пазлы</string>
+    <string name="picture">картинка</string>
+    <string name="confirmation">Подтверждение</string>
+    <string name="are_you_sure">Вы уверены, что хотите выйти?</string>
+    <string name="about_application">О приложении</string>
+    <string name="close">закрыть</string>
+    <string name="authors">Приложение создано Романом Рогачевым и Владимиром Рогачевым.\n\n
+        В приложении использованы фотографии Андрея Павлова
+        (известного в Интернете под ником Antrey)</string>
+    <string name="permission_denied">Доступ запрещен</string>
+    <string name="message_for_rationale_for_gallery">Чтобы использовать галерею, вам необходимо дать разрешение
+        на доступ к фотографиям и мультимедиа на вашем устройстве</string>
+    <string name="go_to_permissions">ПЕРЕЙТИ К РАЗРЕШЕНИЯМ</string>
+    <string name="cancel">ОТМЕНА</string>
+    <string name="message_for_rationale_for_camera">Чтобы использовать камеру, вам необходимо дать разрешение
+        на съемку и запись видео</string>
+    <string name="shape_of_puzzles">Форма пазлов</string>
+    <string name="shape_of_puzzles_submenu_item1">Прямые углы</string>
+    <string name="shape_of_puzzles_submenu_item2">Непрямые углы</string>
+</resources>

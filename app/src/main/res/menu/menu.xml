@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/shape_of_puzzles"
+        android:icon="@drawable/ic_settings_24"
+        android:title="@string/shape_of_puzzles"
+        app:showAsAction="never">
+        <menu>
+            <group
+                android:id="@+id/group_items"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/submenu_item1"
+                    android:checked="true"
+                    android:title="@string/shape_of_puzzles_submenu_item1" />
+                <item
+                    android:id="@+id/submenu_item2"
+                    android:title="@string/shape_of_puzzles_submenu_item2" />
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/about_application"
+        android:icon="@drawable/ic_info_24"
+        android:title="@string/about_application"
+        app:showAsAction="never" />
+</menu>
